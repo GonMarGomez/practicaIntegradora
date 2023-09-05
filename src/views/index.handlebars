@@ -1,0 +1,10 @@
+<div class="productBox">
+  <h1>Hola mundo</h1>
+  {{#each products}}
+    <div class="cards">
+      <h2>{{this.title}}</h2>
+      <h3 class="cards-description">{{this.description}}</h3>
+      <h3>${{this.price}}</h3>
+    </div>
+  {{/each}}
+</div>

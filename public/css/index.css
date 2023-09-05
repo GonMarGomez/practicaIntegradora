@@ -1,0 +1,20 @@
+.productBox{
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+}
+.cards{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.cards-description{
+    text-align: center;
+}
+.box{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
