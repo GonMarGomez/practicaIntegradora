@@ -1,0 +1,14 @@
+<div class="cartBox">
+    <h1>Cart ID: {{cartId}}</h1>
+    {{#each products}}
+        <div class="product-card">
+            <h2>{{title}}</h2>
+            <p>{{description}}</p>
+            <p>Precio: {{price}}</p>
+            <p>Id: {{id}}</p>
+            <p>Quantity: {{quantity}}</p>
+        </div>
+    {{/each}}
+    <button class="butonComprar">Comprar</button>
+      <a href="/products">Volver a la lista de productos</a>
+</div>

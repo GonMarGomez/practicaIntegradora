@@ -2,14 +2,14 @@ import express from 'express'
 import handlebars from 'express-handlebars'
 import productRouter from './routes/productRouter.js'
 import viewsRouter from './routes/viewsRouter.js'
+import cartRouter from './routes/cartRouter.js'
 import __dirname from './utils/constantUtils.js';
 import mongoose from 'mongoose';
 import {Server} from 'socket.io';
-import router from './routes/viewsChat.js';
 import { messageModel } from './modules/chatModel.js';
 
 
-const uri = 'mongodb://127.0.0.1:27017/ecommerce'
+const uri = 'mongodb+srv://GonGomez:proyectoCoderHouse@cluster0.cjpuc82.mongodb.net/ecommerce?retryWrites=true&w=majority'
 mongoose.connect(uri)
 const app = express()
 
@@ -22,9 +22,9 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.static('public'));
 
 
+app.use('/' , viewsRouter)
 app.use('/api/product', productRouter)
-app.use('/products', viewsRouter)
-app.use('/' , router)
+app.use('/api/cart', cartRouter)
 
 const PORT = 8080;
 const htttpServer = app.listen(PORT, ()=>{
@@ -57,3 +57,4 @@ io.on('connection', socket => {
     });
 
 });
+

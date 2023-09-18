@@ -1,16 +1,29 @@
 import { Router } from "express";
-import {productFSService} from '../dao/productFSService.js'
 import { uploader } from "../utils/multerUtil.js";
 import { productDBService } from "../dao/productDBservice.js";
 
 const router = Router();
 
-//const productService = new productFSService('Products.json')
 const productService = new productDBService();
-router.get('/', async (req, res)=>{
-    const products = await productService.getAllProducts();
-    res.send(products)
+router.get('/', async (req, res) => {
+  try {
+    const queryParams = {
+      limit: req.query.limit,
+      page: req.query.page,
+      sort: req.query.sort,
+      category: req.query.category,
+    };
+
+    const products = await productService.getAllProducts(queryParams);
+
+    res.send(products);
+  } catch (error) {
+    console.error('Error en la solicitud GET de productos:', error);
+    res.status(500).send('Error interno del servidor');
+  }
 });
+
+
 router.post('/', uploader.array('thumbnails', 3),(req, res)=>{
 
     if(req.files){
@@ -22,7 +35,7 @@ router.post('/', uploader.array('thumbnails', 3),(req, res)=>{
 
     const result = productService.createProduct(req.body)
     res.send({
-        messsage: result
+        messsage: result,
     });
 });
 

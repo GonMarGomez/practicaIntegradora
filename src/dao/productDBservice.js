@@ -3,15 +3,83 @@ import { productModel } from '../modules/productModel.js';
 
 class productDBService {
 
-    async getAllProducts() {
-        try {
-            const products = await productModel.find();
-            return products
-        } catch (error) {
-            console.error(error.message);
-            return []; 
-        }
+  async getAllProducts(queryParams) {
+    try {
+      const { page = 1, limit, category, sort } = queryParams;
+  
+      // Verifica si limit es una cadena no vacía y contiene un número válido.
+      const parsedLimit = limit && !isNaN(limit) ? parseInt(limit) : 10;
+  
+      const options = {
+        page: parseInt(page),
+        limit: parsedLimit,
+      };
+  
+      let filter = {};
+  
+      if (category) {
+        filter.category = category;
+      }
+  
+      const sortOptions = {};
+      if (sort === 'asc') {
+        sortOptions.price = 1;
+      } else if (sort === 'desc') {
+        sortOptions.price = -1;
+      }
+  
+      options.sort = sortOptions;
+  
+      const products = await productModel.paginate(filter, {
+        ...options,
+        lean: true,
+      });
+  
+      const totalPages = products.totalPages;
+      const prevPage = products.prevPage;
+      const nextPage = products.nextPage;
+      const hasPrevPage = products.hasPrevPage;
+      const hasNextPage = products.hasNextPage;
+      const prevLink = hasPrevPage ? `/productos?page=${prevPage}&limit=${parsedLimit}&category=${category}&sort=${sort}` : null;
+      const nextLink = hasNextPage ? `/productos?page=${nextPage}&limit=${parsedLimit}&category=${category}&sort=${sort}` : null;
+  
+      return {
+        status: 'success',
+        payload: products.docs,
+        totalPages,
+        prevPage,
+        nextPage,
+        page,
+        hasPrevPage,
+        hasNextPage,
+        prevLink,
+        nextLink,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        status: 'error',
+        error: 'Error interno del servidor',
+      };
     }
+  }
+  
+  async getProductById(_id) {
+    try {
+      const product = await productModel.findOne({ _id }).lean();
+      if (product) {
+        return product;
+      } else {
+        console.error('Producto no encontrado');
+        return null;
+      }
+    } catch (err) {
+      console.error('Error al leer el archivo de productos:', err);
+      return null;
+    }
+  }
+
+  
 
     async createProduct(product) {
         const {title, description, code, price, stock, category, thumbnails} = product;
@@ -57,7 +125,7 @@ class productDBService {
     
         async getProductById(_id) {
           try {
-            const product = await productModel.find({_id});  
+            const product = await productModel.find({ _id }).lean();
             if (product) {
               return product;
             } else {
@@ -68,7 +136,8 @@ class productDBService {
             console.error('Error al leer el archivo de productos:', err);
             return null;
           }
-      }
+        }
+        
     
       async updateProduct(_id, product) {
         try{

@@ -1,0 +1,19 @@
+<div class="productDetailBox"> 
+  <h1>Detalles del Producto</h1>
+  {{#if productDetails.length}}
+    {{#with productDetails.[0]}}
+      <div class="product-details">
+        <h2>{{title}}</h2>
+        <p>Precio: ${{price}}</p>
+        <p>Descripción: {{description}}</p>
+        <p>Categoria: {{category}}</p>
+    <button class="addToCart" href="#" data-product-id="{{_id}}">Agregar al carrito</button>
+      </div>
+    {{/with}}
+  {{else}}
+    <p>Producto no encontrado.</p>
+  {{/if}}
+  <a href="/products">Volver a la lista de productos</a>
+</div>
+<script type="module" src="/js/index.js"></script>
+
