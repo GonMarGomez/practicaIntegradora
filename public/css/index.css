@@ -1,20 +1,38 @@
-.productBox{
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-}
-.cards{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-.cards-description{
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     text-align: center;
-}
-.box{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  hr {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .userData {
+    text-align: left;
+    margin-left: 20px;
+  }
+  
+  .userData p {
+    margin: 10px 0;
+  }
+  
+  .userData b {
+    font-weight: bold;
+  }
+  
