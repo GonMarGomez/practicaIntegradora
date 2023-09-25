@@ -9,7 +9,6 @@ const cartDBManager = new CartManager();
 
 router.get('/products', async (req, res) => {
   try {
-    console.log('Parámetros de consulta:', req.query);
     const queryParams = {
       page: req.query.page,
       limit: req.query.limit,

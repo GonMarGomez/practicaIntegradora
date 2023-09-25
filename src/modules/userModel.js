@@ -19,15 +19,8 @@ const userSchema = mongoose.Schema({
         unique: true,
         require: true
     },
-    age: {
-        type: Number,
-        min: 18,
-        require: true
-    },
     password: {
         type: String,
-        minLength: 4,
-        require: true
     },
     role: {
         type: String,

@@ -1,63 +1,64 @@
 import { Router } from 'express';
-import UserService from '../dao/userService.js';
+import passport from 'passport';
+import local from 'passport-local'
 
-const US = new UserService();
 const userRouter = Router();
+const localStratergy = local.Strategy;
 
-userRouter.post('/register', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const isAdmin = email === 'adminCoder@acoder.com' && password === 'adminCod3r123';
-    const role = isAdmin ? 'Admin' : 'Usuario';
-    await US.createUser({ ...req.body, role });
-    req.session.registerSuccess = true;
-    res.redirect('/login');
-  } catch (error) {
-    req.session.registerFailed = true;
-    res.redirect('/register');
-  }
-});
-
-userRouter.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const adminCredentials = {
-        email: 'adminCoder@coder.com',
-        password: 'adminCod3r123',
-    };
-    if (email === adminCredentials.email && password === adminCredentials.password) {
-        req.session.user = {
-            first_name: 'Admin', 
-            last_name: 'Coder',
-            email: adminCredentials.email,
-            age: 0,             
-            role: 'admin',      
-        };
-        req.session.loginFailed = false;
-        res.redirect("/products");  
-    }else{
-        const { first_name, last_name, age, role } = await US.login(email, password);
-
-        req.session.user = { first_name, last_name, email, age, role };
-        req.session.loginFailed = false;
-        res.redirect("/products");
-    }
-} catch (error) {
-    req.session.loginFailed = true;
-    req.session.registerSuccess = false;
-    res.redirect("/login");
+userRouter.post('/register', passport.authenticate(
+  'register', { failureRedirect: '/api/sessions/failRegister' }
+), (req, res) => {
+  res.redirect('/login');
 }
+);
+userRouter.get("/failRegister", (req, res) => {
+  console.log('Failded Stratergy');
+  res.redirect('/register');
+});
+userRouter.post('/login', passport.authenticate(
+  'login', { failureRedirect: '/api/sessions/failLogin' }
+), async (req, res) => {
+  if(!req.user){
+    return res.status(400).send({status: 'error', error: 'Invalid Credentials'})
+  }
+
+  req.session.user = {
+    first_name: req.user.first_name,
+    last_name:req.user.last_name,
+     email: req.user.email,
+     age: req.user.age,
+    }
+
+    res.redirect('/products');
+}
+);
+userRouter.get("/failLogin", (req, res) => {
+  console.log('Failded Stratergy');
+  res.send({
+      status: 'error',
+      message: 'Failed Login'
+  });
 });
 
 userRouter.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('Error al cerrar sesión:', err);
-        res.redirect('/');
-      } else {
-        res.redirect('/login');
-      }
-    });
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error al cerrar sesión:', err);
+      res.redirect('/');
+    } else {
+      res.redirect('/login');
+    }
   });
-  
+});
+userRouter.get('/github', passport.authenticate('github',{scope: ['user:email']}),(req,res)=>{
+ res.send({
+  status: 'success',
+  message: 'success'
+ });
+});
+userRouter.get('/githubcallback', passport.authenticate('github',{failureRedirect: '/api/sessions/login'}),(req,res)=>{
+  req.session.user = req.user;
+  res.redirect('/products')
+ });
+
 export default userRouter;

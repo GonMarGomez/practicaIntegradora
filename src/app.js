@@ -2,14 +2,17 @@ import express from 'express';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import handlebars from 'express-handlebars';
+import mongoose from 'mongoose';
+import { Server } from 'socket.io';
+import passport from 'passport';
+
 import productRouter from './routes/productRouter.js';
 import viewsRouter from './routes/viewsRouter.js';
 import cartRouter from './routes/cartRouter.js';
 import userRouter from './routes/userRouter.js';
 import __dirname from './utils/constantUtils.js';
-import mongoose from 'mongoose';
-import { Server } from 'socket.io';
 import { messageModel } from './modules/chatModel.js';
+import initializatePassport from './config/passportConfig.js';
 
 const uri = 'mongodb+srv://GonGomez:proyectoCoderHouse@cluster0.cjpuc82.mongodb.net/ecommerce?retryWrites=true&w=majority';
 mongoose.connect(uri);
@@ -35,6 +38,10 @@ app.use(
     saveUninitialized: false,
   })
 );
+
+initializatePassport();
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', viewsRouter);
 app.use('/api/product', productRouter);
