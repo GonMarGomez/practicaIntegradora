@@ -1,12 +1,17 @@
 import userModel from '../modules/userModel.js';
+import CartManager from './cartDBService.js';
 import {createHash, isValidPassword} from '../utils/funcionUtil.js'
 
 class UserService {
 
     async createUser(user) {
         try {
+            const cartManager = new CartManager();
+            const cart = await cartManager.createCart();
+            user.cart = cart._id;
             user.password = createHash(user.password);
-            return await userModel.create(user);
+            
+           return await userModel.create(user);
         } catch (error) {
             throw new Error(error.message.replace(/"/g, "'"));
         }
@@ -28,7 +33,7 @@ class UserService {
     }
     async getUserByEmail(email) {
         try {
-          const user = await userModel.find({ email });
+          const user = await userModel.find({ email }).populate('cart');
           return user;
         } catch (error) {
           throw error;

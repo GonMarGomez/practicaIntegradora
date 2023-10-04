@@ -7,7 +7,6 @@ class productDBService {
     try {
       const { page = 1, limit, category, sort } = queryParams;
   
-      // Verifica si limit es una cadena no vacía y contiene un número válido.
       const parsedLimit = limit && !isNaN(limit) ? parseInt(limit) : 10;
   
       const options = {

@@ -3,6 +3,8 @@ import local from 'passport-local'
 import userModel from "../modules/userModel.js";
 import GitHubStrategy from 'passport-github2'
 import dotenv from 'dotenv'
+
+import CartManager from '../dao/cartDBService.js';
 import { createHash, isValidPassword } from "../utils/funcionUtil.js";
 
 dotenv.config()
@@ -18,16 +20,26 @@ const initializatePassport = () => {
     async (req, username, password, done) => {
       const { first_name, last_name, email, age } = req.body;
       try {
+        const cartManager = new CartManager();
+        const cart = await cartManager.createCart();
         let user = await userModel.findOne({ email: username })
         if (user) {
           console.log('User alredy exists');
           return done(null, false);
         }
-        const newUser = { first_name, last_name, email, age, password: createHash(password), role: 'user' };
+
+        const newUser = {
+          first_name,
+          last_name,
+          email,
+          age,
+          password: createHash(password), role: 'user',
+          cart: [cart._id]
+        };
         let result = await userModel.create(newUser)
         return done(null, result)
       }
-      catch {
+      catch(error) {
         return done('Error al registrar usuario:' + error)
       }
     }
@@ -36,8 +48,8 @@ const initializatePassport = () => {
   passport.use('login', new localStratergy({ usernameField: 'email' },
     async (username, password, done) => {
       try {
-          const user = await userModel.findOne({ email: username });
-          console.log(user, 'soy el usuario encontrado');
+        const user = await userModel.findOne({ email: username });
+        console.log(user, 'soy el usuario encontrado');
         if (!user) {
           console.log('User does not exist');
           return (null, false);

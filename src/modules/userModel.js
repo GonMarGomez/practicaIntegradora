@@ -24,7 +24,15 @@ const userSchema = mongoose.Schema({
     },
     role: {
         type: String,
-    }
+        default: "user"
+    },
+    age:{
+        type: Number
+    },
+    cart: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'cart'
+    }]
 });
 
 const userModel = mongoose.model(userCollection, userSchema);

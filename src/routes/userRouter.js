@@ -60,5 +60,25 @@ userRouter.get('/githubcallback', passport.authenticate('github',{failureRedirec
   req.session.user = req.user;
   res.redirect('/products')
  });
+ userRouter.get('/current', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'No hay usuario autenticado',
+    });
+  }
+  const currentUser = {
+    first_name: req.user.first_name,
+    last_name: req.user.last_name,
+    email: req.user.email,
+    age: req.user.age,
+    cart: req.user.cart,
+  };
+  console.log(currentUser);
+  res.status(200).json({
+    status: 'success',
+    payload: currentUser,
+  });
+});
 
 export default userRouter;

@@ -5,6 +5,7 @@ import handlebars from 'express-handlebars';
 import mongoose from 'mongoose';
 import { Server } from 'socket.io';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 
 import productRouter from './routes/productRouter.js';
 import viewsRouter from './routes/viewsRouter.js';
@@ -25,6 +26,7 @@ app.set('view engine', 'handlebars');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use(cookieParser());
 
 app.use(
   session({
