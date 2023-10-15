@@ -1,7 +1,7 @@
 import fs from 'fs';
-import { productModel } from '../modules/productModel.js';
+import { productModel } from '../models/productModel.js';
 
-class productDBService {
+class productController {
 
   async getAllProducts(queryParams) {
     try {
@@ -178,4 +178,4 @@ class productDBService {
     }
     
 
-export { productDBService };
+export { productController };

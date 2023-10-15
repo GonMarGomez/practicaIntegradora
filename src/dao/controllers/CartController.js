@@ -1,7 +1,6 @@
-import { productModel } from "../modules/productModel.js";
-import { cartModel } from "../modules/cartModel.js";
+import { cartModel } from "../models/cartModel.js";
 
-class CartManager {
+class CartController {
 
     async createCart() {
         const cart = {
@@ -148,4 +147,4 @@ class CartManager {
     }
 }
 
-    export default CartManager;
+    export default CartController;

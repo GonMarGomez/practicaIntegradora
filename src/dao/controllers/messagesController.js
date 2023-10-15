@@ -1,5 +1,5 @@
-import { messageModel } from "../modules/chatModel";
-class messagesDBservice {
+import { messageModel } from "../models/chatModel/js";
+class messagesDBController {
 
     async getChats() {
         const chats = await messageModel.find();
@@ -16,4 +16,4 @@ class messagesDBservice {
         }
 }
 
-    export default messagesDBservice;
+    export default messagesDBController;

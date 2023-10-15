@@ -7,15 +7,16 @@ import { Server } from 'socket.io';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
 
+
 import productRouter from './routes/productRouter.js';
 import viewsRouter from './routes/viewsRouter.js';
 import cartRouter from './routes/cartRouter.js';
 import userRouter from './routes/userRouter.js';
 import __dirname from './utils/constantUtils.js';
-import { messageModel } from './modules/chatModel.js';
+import { messageModel } from './dao/models/chatModel.js';
 import initializatePassport from './config/passportConfig.js';
 
-const uri = 'mongodb+srv://GonGomez:proyectoCoderHouse@cluster0.cjpuc82.mongodb.net/ecommerce?retryWrites=true&w=majority';
+const uri = process.env.MONGO_URI
 mongoose.connect(uri);
 const app = express();
 
@@ -50,7 +51,7 @@ app.use('/api/product', productRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/sessions', userRouter);
 
-const PORT = 8080;
+const PORT = process.env.PORT;
 const htttpServer = app.listen(PORT, () => {
   console.log(`Start server in port ${PORT}`);
 });

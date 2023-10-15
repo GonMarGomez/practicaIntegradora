@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { uploader } from "../utils/multerUtil.js";
-import { productDBService } from "../dao/productDBservice.js";
+import { productController } from "../dao/controllers/productController.js";
 
 const router = Router();
 
-const productService = new productDBService();
+const productDBController = new productController();
 router.get('/', async (req, res) => {
   try {
     const queryParams = {
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
       category: req.query.category,
     };
 
-    const products = await productService.getAllProducts(queryParams);
+    const products = await productDBController.getAllProducts(queryParams);
 
     res.send(products);
   } catch (error) {
@@ -33,7 +33,7 @@ router.post('/', uploader.array('thumbnails', 3),(req, res)=>{
       })
     }
 
-    const result = productService.createProduct(req.body)
+    const result = productDBController.createProduct(req.body)
     res.send({
         messsage: result,
     });

@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { productDBService } from '../dao/productDBservice.js';
-import CartManager from '../dao/cartDBService.js';
-import UserService from '../dao/userService.js';
+import { productController } from '../dao/controllers/productController.js';
+import cartController from '../dao/controllers/CartController.js';
+import UserController from '../dao/controllers/UserController.js';
 const router = Router();
-const US = new UserService()
-const productDBManager = new productDBService();
-const cartDBManager = new CartManager();
+const USController = new UserController()
+const productDBController = new productController();
+const cartDBController = new cartController();
 
 router.get('/products', async (req, res) => {
   try {
@@ -16,7 +16,7 @@ router.get('/products', async (req, res) => {
       sort: req.query.sort,
     };
 
-    const productsData = await productDBManager.getAllProducts(queryParams);
+    const productsData = await productDBController.getAllProducts(queryParams);
     res.render('products', {
       products: productsData.payload,
       page: productsData.page,
@@ -47,7 +47,7 @@ router.get('/chat', (req, res) => {
 router.get('/products/:id', async (req, res) => {
   try {
     const productId = req.params.id;
-    const productDetails = await productDBManager.getProductById(productId);
+    const productDetails = await productDBController.getProductById(productId);
     res.render('product-details', {
       productDetails,
       style: 'productDetails.css',
@@ -61,13 +61,13 @@ let cart = {};
 
 router.post('/addToCart', async (req, res) => {
   const productId = req.body.productId;
-  const product = await productDBManager.getProductById(productId);
+  const product = await productDBController.getProductById(productId);
 
   if (Object.keys(cart).length === 0) {
-    cart = await cartDBManager.createCart();
-    await cartDBManager.addProductToCart(cart._id.toString(), product, 1);
+    cart = await cartDBController.createCart();
+    await cartDBController.addProductToCart(cart._id.toString(), product, 1);
   } else {
-    await cartDBManager.addProductToCart(cart._id.toString(), product, 1);
+    await cartDBController.addProductToCart(cart._id.toString(), product, 1);
   }
 
   res.status(204).send();
@@ -75,7 +75,7 @@ router.post('/addToCart', async (req, res) => {
 
 router.get('/carts/:cid', async (req, res) => {
   try {
-    const cart = await cartDBManager.getCartById(req.params.cid);
+    const cart = await cartDBController.getCartById(req.params.cid);
 
     if (!cart) {
       return res.status(404).render('error', { error: 'Carrito no encontrado' });

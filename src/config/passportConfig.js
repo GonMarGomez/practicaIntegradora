@@ -1,10 +1,10 @@
 import passport from 'passport';
 import local from 'passport-local'
-import userModel from "../modules/userModel.js";
+import userModel from "../dao/models/userModel.js";
 import GitHubStrategy from 'passport-github2'
 import dotenv from 'dotenv'
 
-import CartManager from '../dao/cartDBService.js';
+import cartDBController from '../dao/controllers/CartController.js';
 import { createHash, isValidPassword } from "../utils/funcionUtil.js";
 
 dotenv.config()
@@ -20,7 +20,7 @@ const initializatePassport = () => {
     async (req, username, password, done) => {
       const { first_name, last_name, email, age } = req.body;
       try {
-        const cartManager = new CartManager();
+        const cartManager = new cartDBController();
         const cart = await cartManager.createCart();
         let user = await userModel.findOne({ email: username })
         if (user) {
