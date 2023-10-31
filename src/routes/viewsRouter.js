@@ -2,10 +2,14 @@ import { Router } from 'express';
 import { productController } from '../dao/controllers/productController.js';
 import cartController from '../dao/controllers/CartController.js';
 import UserController from '../dao/controllers/UserController.js';
+import TicketController from '../dao/controllers/ticketsController.js';
+import { authorization } from '../utils/authorization.js';
+
 const router = Router();
 const USController = new UserController()
 const productDBController = new productController();
 const cartDBController = new cartController();
+const ticketController = new TicketController();
 
 router.get('/products', async (req, res) => {
   try {
@@ -15,6 +19,8 @@ router.get('/products', async (req, res) => {
       category: req.query.category,
       sort: req.query.sort,
     };
+    const user = req.session.user
+    const cartid = user.cartId
 
     const productsData = await productDBController.getAllProducts(queryParams);
     res.render('products', {
@@ -37,7 +43,8 @@ router.get('/products', async (req, res) => {
   }
 });
 
-router.get('/chat', (req, res) => {
+
+router.get('/chat', authorization('user'), (req, res) => {
   res.render('chat', {
     title: 'Chat - GameShop',
     style: 'chat.css',
@@ -59,48 +66,114 @@ router.get('/products/:id', async (req, res) => {
 
 let cart = {};
 
-router.post('/addToCart', async (req, res) => {
+router.post('/addToCart', authorization('user'), async (req, res) => {
   const productId = req.body.productId;
   const product = await productDBController.getProductById(productId);
+  const cart = req.session.user.cartId
 
-  if (Object.keys(cart).length === 0) {
-    cart = await cartDBController.createCart();
-    await cartDBController.addProductToCart(cart._id.toString(), product, 1);
-  } else {
-    await cartDBController.addProductToCart(cart._id.toString(), product, 1);
-  }
+
+  await cartDBController.addProductToCart(cart, product, 1);
 
   res.status(204).send();
 });
 
 router.get('/carts/:cid', async (req, res) => {
   try {
-    const cart = await cartDBController.getCartById(req.params.cid);
+    const cart = await cartDBController.getCart(req.params.cid);
 
     if (!cart) {
       return res.status(404).render('error', { error: 'Carrito no encontrado' });
     }
 
-    const cartId = cart[0]._id.toString();
+    const productDetails = [];
+    let totalPrice = 0;
 
-    const products = cart[0].products.map((item) => ({
-      title: item.product.title,
-      description: item.product.description,
-      price: item.product.price,
-      id: item.product._id,
-      quantity: item.quantity,
-    }));
+    for (const cartProduct of cart.products) {
+      const product = await productDBController.getProductById(cartProduct.product);
+      if (product) {
+        product.quantity = cartProduct.quantity; 
+
+        productDetails.push(product);
+
+
+        totalPrice += product[0].price * cartProduct.quantity;
+      } else {
+        console.error(`Producto con ID ${cartProduct.product} no encontrado.`);
+      }
+    }
 
     res.render('cart-details', {
       title: 'Cart-GameShop',
       style: 'cart.css',
-      cartId: cartId,
-      products: products,
+      cartId: req.params.cid,
+      products: productDetails,
+      totalPrice,
     });
   } catch (error) {
     res.render('error', { error });
   }
 });
+
+
+router.post('/purchase', async (req, res) => {
+  const emailUser = req.session.user.username
+  const user = await USController.getUserByEmail({ email: emailUser})
+  let cartId = null;
+
+if (Array.isArray(user) && user.length > 0) {
+    cartId = user[0].cart[0]._id.toString();
+  
+}
+if (cartId) {
+  let userId = user[0]._id.toString();
+  const ticket = await ticketController.generateTicket(cartId,emailUser, userId);
+  res.json({ ticket })
+} else {
+  console.error('No se encontro cartID')
+}
+ });
+
+
+
+router.get('/ticket', async (req, res) => {
+  const emailUser = req.session.user.username
+  const user = await USController.getUserByEmail({ email: emailUser})
+  const ticketId = user[0].ticket[0].ticketInfo;
+  const ticket = await ticketController.getTicketById(ticketId)
+  const response = {
+      code : ticket[0].code,
+      purchase_datetime: ticket[0].purchase_datetime,
+      amount: ticket[0].amount,
+      user: ticket[0].purchaser,
+  };
+
+  res.render(
+      'ticket',
+      {
+          ticket: response,
+          style: "ticket.css",
+      }
+  );
+});
+router.put('/tickets/finish', async (req, res) => {
+  if (!req.session.user) {
+    res.status(401).send('No se ha iniciado sesión');
+    return;
+  }
+  const user = await USController.getUserByEmail(req.session.user.username)
+  if (user && user.length > 0) {
+    const userId = user[0]._id.toString();
+    
+
+    await ticketController.deleteTicketFromUser(userId);
+
+ 
+    res.redirect('/products');
+  } else {
+    res.status(404).send('Usuario no encontrado');
+  }
+});
+
 
 router.get('/', auth, async (req, res) => {
   res.render('index', {
@@ -114,31 +187,32 @@ router.get('/', auth, async (req, res) => {
 router.get("/login", logged, async (req, res) => {
 
   res.render(
-      'login',
-      {
-          title: "Log In GamesShop",
-          style: "login.css",
-          loginFailed: req.session.loginFailed ?? false,
-          registerSuccess: req.session.registerSuccess ?? false
-      }
+    'login',
+    {
+      title: "Log In GamesShop",
+      style: "login.css",
+      loginFailed: req.session.loginFailed ?? false,
+      registerSuccess: req.session.registerSuccess ?? false
+    }
   );
 });
 
 router.get("/register", logged, async (req, res) => {
 
   res.render(
-      'register',
-      {
-          title: "Register GamesShop",
-          style: "register.css",
-          registerFailed: req.session.registerFailed ?? false
-      }
+    'register',
+    {
+      title: "Register GamesShop",
+      style: "register.css",
+      registerFailed: req.session.registerFailed ?? false
+    }
   );
 });
 
+
 function auth(req, res, next) {
   if (!req.session.user) {
-      return res.redirect("/login");
+    return res.redirect("/login");
   }
 
   next();
@@ -146,7 +220,7 @@ function auth(req, res, next) {
 
 function logged(req, res, next) {
   if (req.session.user) {
-      return res.redirect("/");
+    return res.redirect("/");
   }
 
   next();

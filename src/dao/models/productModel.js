@@ -33,6 +33,6 @@ category: {
 thumbnails: {
     type: Array,
 }
-});
+},{ toObject: { getters: true, virtuals: true }, versionKey: false, minimize: false, lean: true });
 productSchema.plugin(mongoosePaginate)
 export const productModel = mongoose.model(productCollection, productSchema);

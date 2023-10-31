@@ -1,6 +1,6 @@
 import passport from 'passport';
 import local from 'passport-local'
-import userModel from "../dao/models/userModel.js";
+import {userModel} from "../dao/models/userModel.js";
 import GitHubStrategy from 'passport-github2'
 import dotenv from 'dotenv'
 
@@ -49,7 +49,6 @@ const initializatePassport = () => {
     async (username, password, done) => {
       try {
         const user = await userModel.findOne({ email: username });
-        console.log(user, 'soy el usuario encontrado');
         if (!user) {
           console.log('User does not exist');
           return (null, false);
@@ -81,7 +80,7 @@ const initializatePassport = () => {
   },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        console.log('Este es el perfil', profile);
+      
         let user = await userModel.findOne({ username: profile._json.login })
         if (!user) {
           let nombreCompleto = profile._json.name;

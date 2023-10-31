@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import passport from 'passport';
 import local from 'passport-local'
+import UserDTO from '../dao/DTOs/userDTO.js';
+import UserController from '../dao/controllers/UserController.js';
 
 const userRouter = Router();
 const localStratergy = local.Strategy;
+const userController = new UserController()
 
 userRouter.post('/register', passport.authenticate(
   'register', { failureRedirect: '/api/sessions/failRegister' }
@@ -22,12 +25,7 @@ userRouter.post('/login', passport.authenticate(
     return res.status(400).send({status: 'error', error: 'Invalid Credentials'})
   }
 
-  req.session.user = {
-    first_name: req.user.first_name,
-    last_name:req.user.last_name,
-     email: req.user.email,
-     age: req.user.age,
-    }
+  req.session.user = new UserDTO(req.user)
 
     res.redirect('/products');
 }
@@ -60,24 +58,20 @@ userRouter.get('/githubcallback', passport.authenticate('github',{failureRedirec
   req.session.user = req.user;
   res.redirect('/products')
  });
- userRouter.get('/current', (req, res) => {
+
+ userRouter.get('/current', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({
       status: 'error',
       message: 'No hay usuario autenticado',
     });
   }
-  const currentUser = {
-    first_name: req.user.first_name,
-    last_name: req.user.last_name,
-    email: req.user.email,
-    age: req.user.age,
-    cart: req.user.cart,
-  };
+  const currentUser = await userController.getUserByEmail(req.user.email);
+  const user = await userController.showCurrentUser(currentUser[0])
   console.log(currentUser);
   res.status(200).json({
     status: 'success',
-    payload: currentUser,
+    payload: user,
   });
 });
 

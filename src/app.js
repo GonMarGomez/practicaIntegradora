@@ -13,8 +13,9 @@ import viewsRouter from './routes/viewsRouter.js';
 import cartRouter from './routes/cartRouter.js';
 import userRouter from './routes/userRouter.js';
 import __dirname from './utils/constantUtils.js';
-import { messageModel } from './dao/models/chatModel.js';
+import ChatController from './dao/controllers/chatController.js';
 import initializatePassport from './config/passportConfig.js';
+import mailRouter from './routes/mailRouter.js';
 
 const uri = process.env.MONGO_URI
 mongoose.connect(uri);
@@ -50,33 +51,31 @@ app.use('/', viewsRouter);
 app.use('/api/product', productRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/sessions', userRouter);
+app.use('/send',mailRouter)
 
 const PORT = process.env.PORT;
-const htttpServer = app.listen(PORT, () => {
+const httpServer = app.listen(PORT, () => {
   console.log(`Start server in port ${PORT}`);
 });
-
-const io = new Server(htttpServer);
+const io = new Server(httpServer);
 const messages = [];
-io.on('connection', (socket) => {
-  console.log('Nuevo cliente conectado ', socket.id);
+const chatController = new ChatController();
+io.on('connection', socket => {
+    console.log('Nuevo cliente conectado ', socket.id);
 
-  socket.on('message', async (data) => {
-    try {
-      await messageModel.create(data);
-    } catch (error) {
-      console.error('Error al guardar mensajes en DB');
-    }
-    messages.push(data);
-    io.emit('messagesLogs', messages);
-  });
+    socket.on('message', async data => {
+        try {
+            await chatController.saveChat(data); 
+        } catch (error) {
+            console.error('Error al guardar el mensaje en la base de datos:', error.message);
+        }
+        messages.push(data);
+        io.emit('messagesLogs', messages);
+    });
 
-  socket.on('userConnect', (data) => {
-    socket.emit('messagesLogs', messages);
-    socket.broadcast.emit('newUser', data);
-  });
-  socket.on('userConnect', async (data) => {
-    socket.emit('messagesLogs', await messageModel.find());
-    socket.broadcast.emit('newUser', data);
-  });
+    socket.on('userConnect', async data => {
+        socket.emit('messagesLogs', await chatController.getChats());
+        socket.broadcast.emit('newUser', data);
+    });
 });
+

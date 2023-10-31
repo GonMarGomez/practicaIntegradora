@@ -8,17 +8,24 @@ const userSchema = mongoose.Schema({
         minLength: 3,
         require: true
     },
+    
     last_name: {
         type: String,
         minLength: 3,
+        require: true
+    }
+    ,
+    full_name: {
+        type: String,
         require: true
     },
     email: {
         type: String,
         minLength: 3,
         unique: true,
-        require: true
+        required: true 
     },
+    
     password: {
         type: String,
     },
@@ -31,10 +38,20 @@ const userSchema = mongoose.Schema({
     },
     cart: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'cart'
-    }]
+        ref: 'carts'
+    }],
+    ticket: {
+        type:[
+            {
+                ticketInfo: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'tickets'
+                }
+            }
+        ],
+        default: [],
+    },
 });
 
-const userModel = mongoose.model(userCollection, userSchema);
 
-export default userModel;
+export const userModel = mongoose.model(userCollection, userSchema);

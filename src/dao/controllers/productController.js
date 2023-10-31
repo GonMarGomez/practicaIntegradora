@@ -1,5 +1,4 @@
-import fs from 'fs';
-import { productModel } from '../models/productModel.js';
+import { productService } from "../repository/index.js";
 
 class productController {
 
@@ -29,7 +28,7 @@ class productController {
   
       options.sort = sortOptions;
   
-      const products = await productModel.paginate(filter, {
+      const products = await productService.paginateProducts(filter, {
         ...options,
         lean: true,
       });
@@ -65,7 +64,7 @@ class productController {
   
   async getProductById(_id) {
     try {
-      const product = await productModel.findOne({ _id }).lean();
+      const product = await productService.getById({ _id }).lean();
       if (product) {
         return product;
       } else {
@@ -100,7 +99,7 @@ class productController {
 
 
         try {
-            const result = await productModel.create(newProduct)
+            const result = await productService.createProduct(newProduct)
 
             return 'Producto creado correctamente';
         } catch (error) {
@@ -109,7 +108,7 @@ class productController {
         }
     }
     async getProducts() {
-        const products = await productModel.find();
+        const products = await productService.paginateProducts();
         
         if (products.length < 1) {
           return [];
@@ -124,7 +123,7 @@ class productController {
     
         async getProductById(_id) {
           try {
-            const product = await productModel.find({ _id }).lean();
+            const product = await productService.getById({_id});
             if (product) {
               return product;
             } else {
@@ -140,36 +139,16 @@ class productController {
     
       async updateProduct(_id, product) {
         try{
-          const products = await productModel.find({_id});
-          let productUpdated = {};
-      
-          for (let key in products) {
-              if (products[key].id == _id) {
-                products[key].title = product.title ? product.title : products[key].title;
-                products[key].description = product.description ? product.description : products[key].description;
-                products[key].price = product.price ? product.price : products[key].price;
-                products[key].code = product.code ? product.code : products[key].code;
-                products[key].stock = product.stock ? product.stock : products[key].stock;
-                products[key].category = product.category ? product.category : products[key].category;
-                products[key].thumbnails = product.thumbnails ? product.thumbnails : products[key].thumbnails;
-                if (product.status !== undefined) {
-                  products[key].status = typeof product.status === 'string' ? product.status === 'true' : Boolean(product.status);
-                }
-      
-                productUpdated = products[key];
-              }
-          }
-          const result = await productModel.updateOne({_id}, productUpdated);
-          return result;
-        } catch (err) {
-          console.error('Error al actualizar el producto:', err);
-          throw err; 
+          let result = await productService.updateById(_id, product);
+          return result
+        }catch(err){
+          console.error('Error al leer el archivo de productos:', err);
         }
       }
     
       async deleteProduct(_id) {
         try {
-          const result = await productModel.deleteOne({_id});
+          const result = await productService.deleteById({_id});
           return result
         }catch (err) {
           console.error('Error al leer el archivo de productos:', err);

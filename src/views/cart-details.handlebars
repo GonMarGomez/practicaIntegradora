@@ -1,14 +1,19 @@
 <div class="cartBox">
-    <h1>Cart ID: {{cartId}}</h1>
-    {{#each products}}
-        <div class="product-card">
-            <h2>{{title}}</h2>
-            <p>{{description}}</p>
-            <p>Precio: {{price}}</p>
-            <p>Id: {{id}}</p>
-            <p>Quantity: {{quantity}}</p>
-        </div>
+  <h1>Cart ID: {{cartId}}</h1>
+  {{#each products}}
+    {{#each this}}
+      <div class="product-card">
+        <h2>{{title}}</h2>
+        <p>{{description}}</p>
+        <p>Precio: ${{price}}</p>
+      </div>
     {{/each}}
-    <button class="butonComprar">Comprar</button>
-      <a href="/products">Volver a la lista de productos</a>
+        <p>Cantidad: {{quantity}}</p>
+  {{/each}}
+  <p>Total: ${{totalPrice}}</p>
+     <div>
+        <button class="purchase">Terminar Compra</button>
+    </div>
+  <a href="/products">Volver a la lista de productos</a>
 </div>
+<script type="module" src="/js/index.js"></script>

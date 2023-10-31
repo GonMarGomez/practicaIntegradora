@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import CartController from '../dao/controllers/CartController.js';
 import { productController } from '../dao/controllers/productController.js';
+import TicketController from '../dao/controllers/ticketsController.js';
 
 const cartRouter = Router();
 
 const cartController = new CartController();
 const productDBController = new productController();
-
+const ticketController = new TicketController();
 cartRouter.post('/', async (req, res) => {
     const cart = await cartController.createCart();
 
@@ -109,6 +110,12 @@ cartRouter.post('/:cid/product/:pid', async (req, res) => {
     await cartController.addProductToCart(cartId, product, 1);
 
     res.send(cart);
+
+});
+cartRouter.get('/:cid/purchase', async (req, res) => {
+    const ticket = await ticketController.generateTicket(req.params.cid, req.session.user.email);
+
+    res.send({ ticket });
 });
 
 
