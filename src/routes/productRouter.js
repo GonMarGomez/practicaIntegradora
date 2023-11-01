@@ -1,42 +1,91 @@
 import { Router } from "express";
 import { uploader } from "../utils/multerUtil.js";
+import { authorization } from "../utils/authorization.js";
 import { productController } from "../dao/controllers/productController.js";
 
 const router = Router();
 
 const productDBController = new productController();
+
 router.get('/', async (req, res) => {
-  try {
-    const queryParams = {
-      limit: req.query.limit,
-      page: req.query.page,
-      sort: req.query.sort,
-      category: req.query.category,
-    };
+  const limit = parseInt(req.query.limit);
+  const page = parseInt(req.query.page);
+  const sort= req.query.sort;
+  const category = req.query.category;
+  const status = req.query.status;
 
-    const products = await productDBController.getAllProducts(queryParams);
+  const products = await productDBController.getAllProducts(limit, sort, category, status, page);
 
-    res.send(products);
-  } catch (error) {
-    console.error('Error en la solicitud GET de productos:', error);
-    res.status(500).send('Error interno del servidor');
+  const queryParams = new URLSearchParams();
+  if (limit) queryParams.set('limit', limit);
+  if (sort) queryParams.set('sort', sort);
+  if (category) queryParams.set('category', category);
+  if (status) queryParams.set('status', status);
+
+  const queryString = queryParams.toString();
+
+  const response = {
+      status: "success",
+      payload: products.docs,
+      totalPages: products.totalPages,
+      prevPage: products.prevPage,
+      nextPage: products.nextPage,
+      page: products.page,
+      hasPrevPage: products.hasPrevPage,
+      hasNextPage: products.hasNextPage,
+      prevLink: products.hasPrevPage ? `/products?page=${products.prevPage}&${queryString}` : '',
+      nextLink: products.hasNextPage ? `/products?page=${products.nextPage}&${queryString}` : '',
+  };
+
+  res.send(response)
+})
+
+router.get('/:pid', async (req, res) => {
+  const product = await productDBController.getProductById(req.params.pid);
+
+  if (!product) {
+      return res.status(404).send({ error: 'Producto no encontrado' });
   }
+
+  res.send({product});
+})
+
+router.post('/', authorization('admin'), async (req,res)=> {
+  const { title, description, price, thumbnails, code, stock, category, status } = req.body;
+
+  const parsePrice = parseFloat(price);
+  const parseStock = parseFloat(stock);
+
+  const product = await productDBController.createProduct(title, description, parsePrice, thumbnails, code, parseStock, category, status);
+
+  res.send({product})
+})
+
+router.put('/:pid', authorization('admin'), async (req, res) => {
+  const productId = req.params.pid;
+  const modifications = req.body;
+
+  const product = await productDBController.getProductById(productId);
+
+  if (!product) {
+      return res.status(404).send({ error: 'Producto no encontrado' });
+  }
+
+  await productDBController.updateProduct(productId, modifications);
+  const updatedProduct = await productDBController.getProductById(productId);
+  
+  res.send({ updatedProduct });
 });
 
+router.delete('/:pid', authorization('admin'), async (req, res) => {
+  const productId = req.params.pid;
+  const product = await productDBController.deleteProduct(productId);
 
-router.post('/', uploader.array('thumbnails', 3),(req, res)=>{
+  res.send({product, message: `El producto con Id ${productId} fue eliminado`});
+})
 
-    if(req.files){
-        req.body.thumbnails = []
-      req.files.forEach((file)=>{
-        req.body.thumbnails.push(file.filename)
-      })
-    }
 
-    const result = productDBController.createProduct(req.body)
-    res.send({
-        messsage: result,
-    });
-});
+
+
 
 export default router;

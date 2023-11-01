@@ -93,25 +93,7 @@ cartRouter.delete('/:cid', async (req, res) => {
 
     res.send(result);
 });
-cartRouter.post('/:cid/product/:pid', async (req, res) => {
-    const cartId = req.params.cid;
-    const productId = req.params.pid;
 
-    const cart = await cartController.getCartById(cartId);
-    if (!cart) {
-        return res.status(404).send({ error: 'Carrito no encontrado' });
-    }
-
-    const product = await productDBController.getProductById(productId);
-    if (!product) {
-        return res.status(404).send({ error: 'Producto no encontrado' });
-    }
-
-    await cartController.addProductToCart(cartId, product, 1);
-
-    res.send(cart);
-
-});
 cartRouter.get('/:cid/purchase', async (req, res) => {
     const ticket = await ticketController.generateTicket(req.params.cid, req.session.user.email);
 

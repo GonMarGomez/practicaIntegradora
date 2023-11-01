@@ -1,7 +1,7 @@
 import { Router } from 'express';
+import UserDTO from '../dao/DTOs/userDTO.js';
 import passport from 'passport';
 import local from 'passport-local'
-import UserDTO from '../dao/DTOs/userDTO.js';
 import UserController from '../dao/controllers/UserController.js';
 
 const userRouter = Router();
@@ -66,10 +66,10 @@ userRouter.get('/githubcallback', passport.authenticate('github',{failureRedirec
       message: 'No hay usuario autenticado',
     });
   }
-  const currentUser = await userController.getUserByEmail(req.user.email);
-  const user = await userController.showCurrentUser(currentUser[0])
-  console.log(currentUser);
-  res.status(200).json({
+  const usuarioAutenticado = req.user;
+  const user = await userController.showCurrentUser(usuarioAutenticado)
+
+  return res.json({
     status: 'success',
     payload: user,
   });
