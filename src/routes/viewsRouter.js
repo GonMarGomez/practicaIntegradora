@@ -158,17 +158,17 @@ router.get('/ticket', async (req, res) => {
 router.put('/tickets/finish', async (req, res) => {
   if (!req.session.user) {
     res.status(401).send('No se ha iniciado sesión');
+    
     return;
   }
-  const user = await USController.getUserByEmail(req.session.user.username)
+  const email = req.session.user.username
+  const user = await USController.getUserByEmail({email})
   if (user && user.length > 0) {
     const userId = user[0]._id.toString();
-    
-
     await ticketController.deleteTicketFromUser(userId);
+    res.send();
 
  
-    res.redirect('/products');
   } else {
     res.status(404).send('Usuario no encontrado');
   }

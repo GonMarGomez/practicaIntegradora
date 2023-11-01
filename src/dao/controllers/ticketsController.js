@@ -37,7 +37,6 @@ class TicketController {
 
         if (productsAvailable.length > 0){
             const ticket = await ticketsService.saveTicket(ticketDataArray, email);
-            console.log(email, 'DESDE TIKET CONTROLLER')
             await userService.addTicketToUser(userId, ticket._id);
             
             for (const product of productsAvailable) {
