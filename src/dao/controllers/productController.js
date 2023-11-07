@@ -81,7 +81,6 @@ class productController {
 
     async createProduct(product) {
         const {title, description, code, price, stock, category, thumbnails} = product;
-
         if (!title || !description || !code || !price || !stock || !category) {
             return 'Error al crear el producto';
         }
@@ -96,13 +95,12 @@ class productController {
             category,
             thumbnails: thumbnails ?? []
         }
-
-
         try {
             const result = await productService.createProduct(newProduct)
 
             return 'Producto creado correctamente';
         } catch (error) {
+          console.log(newProduct, 'SOY EL NEWPRODUCT')
             console.error(error.message);
             return 'Error al crear el producto';
         }

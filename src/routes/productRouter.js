@@ -2,6 +2,9 @@ import { Router } from "express";
 import { uploader } from "../utils/multerUtil.js";
 import { authorization } from "../utils/authorization.js";
 import { productController } from "../dao/controllers/productController.js";
+import CustomError from "../errorHandler/CustomError.js";
+import { generateProductErrorInfo } from "../errorHandler/info.js";
+import Errors from '../errorHandler/enums.js'
 
 const router = Router();
 
@@ -49,14 +52,19 @@ router.get('/:pid', async (req, res) => {
 
   res.send({product});
 })
-
-router.post('/', authorization('admin'), async (req,res)=> {
+//authorization('admin'),
+router.post('/', async (req,res)=> {
   const { title, description, price, thumbnails, code, stock, category, status } = req.body;
 
-  const parsePrice = parseFloat(price);
-  const parseStock = parseFloat(stock);
-
-  const product = await productDBController.createProduct(title, description, parsePrice, thumbnails, code, parseStock, category, status);
+  if(!title || !description || !price || !code || !stock || !category){
+    CustomError.createError({
+      name: 'Error adding product',
+      cause: generateProductErrorInfo({title, description, price, code, stock, category}),
+      message: 'Error trying to add product',
+      code: Errors.INVALID_TYPES_ERROR
+    })
+  }
+  const product = await productDBController.createProduct({title, description, price, thumbnails, code, stock, category, status});
 
   res.send({product})
 })
