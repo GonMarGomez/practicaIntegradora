@@ -4,7 +4,7 @@ import { authorization } from "../utils/authorization.js";
 import { productController } from "../dao/controllers/productController.js";
 import CustomError from "../errorHandler/CustomError.js";
 import { generateProductErrorInfo } from "../errorHandler/info.js";
-import Errors from '../errorHandler/enums.js'
+import ErrorCodes from "../errorHandler/enums.js";
 
 const router = Router();
 
@@ -53,21 +53,42 @@ router.get('/:pid', async (req, res) => {
   res.send({product});
 })
 //authorization('admin'),
-router.post('/', async (req,res)=> {
-  const { title, description, price, thumbnails, code, stock, category, status } = req.body;
 
-  if(!title || !description || !price || !code || !stock || !category){
-    CustomError.createError({
-      name: 'Error adding product',
-      cause: generateProductErrorInfo({title, description, price, code, stock, category}),
-      message: 'Error trying to add product',
-      code: Errors.INVALID_TYPES_ERROR
-    })
+router.post('/', async (req,res,next)=> {
+  try{
+      const { title, description, price, thumbnails, code, stock, category, status } = req.body;
+
+      if (!title || !description || !price || !code || !stock || !category) {
+          CustomError.createError({
+              name: 'Product creation error',
+              cause: generateProductErrorInfo({title, description, price, code, stock, category}),
+              message: 'Error trying to create Product',
+              code: ErrorCodes.INVALID_TYPES_ERROR,
+          });
+      }
+
+      const product = await productDBController.createProduct({title, description, price, thumbnails, code, stock, category, status});
+
+      res.send({
+          status: 'success',
+          payload: product
+      });
   }
-  const product = await productDBController.createProduct({title, description, price, thumbnails, code, stock, category, status});
-
-  res.send({product})
+  catch (error){
+      next(error);
+      }
 })
+
+
+
+
+
+
+
+
+
+
+
 
 router.put('/:pid', authorization('admin'), async (req, res) => {
   const productId = req.params.pid;

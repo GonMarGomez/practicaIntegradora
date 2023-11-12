@@ -19,8 +19,8 @@ import mockingProducts from './routes/testingRoutes/productsMocks.js'
 import initializatePassport from './config/passportConfig.js';
 import mailRouter from './routes/mailRouter.js';
 
+
 const uri = process.env.MONGO_URI
-mongoose.connect(uri);
 const app = express();
 
 app.engine('handlebars', handlebars.engine());
@@ -32,6 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(cookieParser());
 
+mongoose.connect(uri);
 app.use(
   session({
     store: MongoStore.create({
@@ -49,9 +50,9 @@ initializatePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/', viewsRouter);
 app.use('/api/product', productRouter);
 app.use(ErrorHandler)
+app.use('/', viewsRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/sessions', userRouter);
 app.use('/send',mailRouter)

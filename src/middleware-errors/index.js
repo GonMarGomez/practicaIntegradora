@@ -1,19 +1,16 @@
 import ErrorCodes from "../errorHandler/enums.js";
 
-export default (error, req, res, next) => {
-    console.log(error.cause);
+export default (err, req, res, next) => {
+    console.log(err.code);
 
-    switch (error.code) {
-        case ErrorCodes.INVALID_TYPES_ERROR:
-            console.log('Soy el error')
-            res.status(400).send({status: 'error', error: error.name});
+    switch (err.code) {
+        case ErrorCodes.INVALID_PARAMS:
+            res.status(400).send({status: 'err', err: err});
             break;
-        case ErrorCodes.INVALID_PARAM:
-            console.log('Soy el error')
-            res.status(400).send({status: 'error', error: error.name});
+        case ErrorCodes.INVALID_TYPES_ERROR:
+            res.status(400).send({status: 'err', err: err});
             break;
         default:
-            console.log('Soy el error')
-            res.status(500).send({status: 'error', error: 'Unhandled error'});
-    }
+            res.status(500).send({status: 'err', err: 'Unhandled err'});
+    }
 }
