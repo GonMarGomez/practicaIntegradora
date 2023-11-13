@@ -1,0 +1,4 @@
+error: Este es un mensaje de error {"timestamp":"2023-11-12T01:41:24.146Z"}
+fatal: Este es un mensaje fatal {"timestamp":"2023-11-12T01:41:24.148Z"}
+error: Este es un mensaje de error {"timestamp":"2023-11-12T01:43:43.274Z"}
+fatal: Este es un mensaje fatal {"timestamp":"2023-11-12T01:43:43.274Z"}

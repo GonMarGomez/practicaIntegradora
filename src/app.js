@@ -14,10 +14,12 @@ import cartRouter from './routes/cartRouter.js';
 import userRouter from './routes/userRouter.js';
 import __dirname from './utils/constantUtils.js';
 import ChatController from './dao/controllers/chatController.js';
-import ErrorHandler from './middleware-errors/index.js'
+import ErrorHandler from './middlewares/index.js'
 import mockingProducts from './routes/testingRoutes/productsMocks.js'
 import initializatePassport from './config/passportConfig.js';
 import mailRouter from './routes/mailRouter.js';
+import testLoggs from './routes/test-loggs/testLogs.js'
+import { addLogger } from './middlewares/logger.js';
 
 
 const uri = process.env.MONGO_URI
@@ -50,6 +52,7 @@ initializatePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(addLogger)
 app.use('/api/product', productRouter);
 app.use(ErrorHandler)
 app.use('/', viewsRouter);
@@ -57,6 +60,7 @@ app.use('/api/cart', cartRouter);
 app.use('/api/sessions', userRouter);
 app.use('/send',mailRouter)
 app.use('/test', mockingProducts)
+app.use('/testLog', testLoggs)
 const PORT = process.env.PORT;
 const httpServer = app.listen(PORT, () => {
   console.log(`Start server in port ${PORT}`);
