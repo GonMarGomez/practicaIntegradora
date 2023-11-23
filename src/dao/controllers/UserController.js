@@ -29,7 +29,6 @@ class UserController {
     async getUserByEmail(email) {
       try {
           const user = await userService.getUser(email);
-
           if (user) {
               return user;
           } else {
@@ -63,6 +62,24 @@ class UserController {
             return user;
         }catch (err) {
             console.error('Error al buscar usuario:', err);
+            return null;
+        }
+    }
+    async updatePassword(userId, newPassword) {
+        try{
+            const user = await userService.updatePassword(userId, newPassword);
+            return user;
+        }catch (err) {
+            console.error('Error al cambiar el password', err);
+            return null;
+        }
+    }
+
+    async updateUserRole(userId, newRole) {
+        try {
+            const updateResult = await userService.updateUserRole(userId, newRole);
+        } catch (err) {
+            console.error('Error al cambiar el rol del usuario', err);
             return null;
         }
     }

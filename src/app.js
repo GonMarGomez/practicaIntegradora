@@ -19,6 +19,7 @@ import mockingProducts from './routes/testingRoutes/productsMocks.js'
 import initializatePassport from './config/passportConfig.js';
 import mailRouter from './routes/mailRouter.js';
 import testLoggs from './routes/test-loggs/testLogs.js'
+import changePasswordRouter from './routes/forgotPasswordRouter.js'
 import { addLogger } from './middlewares/logger.js';
 
 
@@ -59,6 +60,7 @@ app.use('/', viewsRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/sessions', userRouter);
 app.use('/send',mailRouter)
+app.use('/forgot-password', changePasswordRouter)
 app.use('/test', mockingProducts)
 app.use('/testLog', testLoggs)
 const PORT = process.env.PORT;

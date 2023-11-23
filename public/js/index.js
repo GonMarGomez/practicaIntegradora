@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   let addToCartButtons = document.querySelectorAll(".addToCart");
   

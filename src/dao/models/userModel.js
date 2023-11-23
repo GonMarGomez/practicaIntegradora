@@ -31,7 +31,8 @@ const userSchema = mongoose.Schema({
     },
     role: {
         type: String,
-        default: "user"
+        enum: ['user', 'admin', 'premium'],
+        default: 'user'
     },
     age:{
         type: Number

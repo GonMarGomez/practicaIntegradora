@@ -53,7 +53,7 @@ const initializatePassport = () => {
           console.log('User does not exist');
           return (null, false);
         }
-        if (!isValidPassword(user, password)) {
+        if (!isValidPassword(password, user.password)) {
           return done(null, false);
         }
         return done(null, user)
@@ -63,15 +63,6 @@ const initializatePassport = () => {
       }
     }
   ));
-
-  passport.serializeUser((user, done) => {
-    done(null, user._id);
-  });
-  passport.deserializeUser(async (id, done) => {
-    const user = await userModel.findById(id);
-    done(null, user);
-  })
-
   passport.use('github', new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
@@ -103,5 +94,14 @@ const initializatePassport = () => {
         return done(error)
       }
     }))
+
+
+    passport.serializeUser((user, done) => {
+      done(null, user._id);
+    });
+    passport.deserializeUser(async (id, done) => {
+      const user = await userModel.findById(id);
+      done(null, user);
+    })
 }
 export default initializatePassport;

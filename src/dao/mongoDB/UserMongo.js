@@ -1,9 +1,11 @@
 import { userModel } from "../models/userModel.js";
+import { createHash } from "../../utils/funcionUtil.js";
 
 export default class Users {
 
     findByEmail = async (email) => {
-        const result = await userModel.find(email).populate({
+        const normalizedEmail = String(email).toLowerCase();
+        const result = await userModel.findOne({ email: normalizedEmail }).populate({
             path: 'cart.cartInfo',
             populate: {
                 path: 'products.product'
@@ -15,8 +17,6 @@ export default class Users {
         return result;
     }
     
-    
-
     findUserById = async (_id) => {
         const result = await userModel.findOne({_id});
         return result;
@@ -40,4 +40,21 @@ export default class Users {
         );
         return result;
     }
+    updatePassword = async (userId, newPassword) =>{
+        let hashedPassword = createHash(newPassword)
+        let result = await userModel.updateOne(
+            { _id: userId },
+            { $set: { password: hashedPassword}},
+        );
+        return result;
+    } 
+
+    updateRole = async (userId, newRole) =>{
+        let result = await userModel.updateOne(
+            { _id: userId },
+            { $set: { role:newRole}},
+        );
+        console.log("Soy Update result:", result);
+        return result;
+    } 
 }

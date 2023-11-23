@@ -5,6 +5,14 @@
   align-items: center;
   justify-content: center;
 }
+.loginLinks{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
+}
   .container {
     background-color: #fff;
     padding: 20px;

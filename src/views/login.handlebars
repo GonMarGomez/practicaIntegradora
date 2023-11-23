@@ -10,10 +10,15 @@
 
     <button type="submit">Login</button>
 </form>
+<section class="loginLinks">
 <span><a href="/register" target="_self">Register</a></span>
 <div>
-  <a href="/api/sessions/github"><button>Ingresar con GitHub</button></a>  
+<a href="/api/sessions/github"><button>Ingresar con GitHub</button></a>  
 </div>
+<div>
+<a href="/forgot-password" target="_self">¿Olvidaste tu contraseña?</a>
+</div> </section>
+
 {{#if loginFailed}}
     <script type="text/javascript">
         alert('Login Failed!');
