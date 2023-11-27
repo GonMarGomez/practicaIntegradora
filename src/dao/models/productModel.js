@@ -32,7 +32,11 @@ category: {
 },
 thumbnails: {
     type: Array,
-}
+}, owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'users',
+    default: 'admin'
+},
 },{ toObject: { getters: true, virtuals: true }, versionKey: false, minimize: false, lean: true });
 productSchema.plugin(mongoosePaginate)
 export const productModel = mongoose.model(productCollection, productSchema);

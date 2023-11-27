@@ -26,7 +26,6 @@ cartRouter.get('/:cid', async (req, res) => {
 cartRouter.post('/:cid/product/:pid', async (req, res) => {
     const cartId = req.params.cid;
     const productId = req.params.pid;
-
     const cart = await cartController.getCartById(cartId);
         if (!cart) {
             return res.status(404).send({ error: 'Carrito no encontrado' });
@@ -38,7 +37,7 @@ cartRouter.post('/:cid/product/:pid', async (req, res) => {
         }
 
         await cartController.addProductToCart(cartId, productId, 1);
-
+     
         res.send(cart);
 });
 cartRouter.put('/:cid', async (req, res) => {

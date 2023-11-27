@@ -2,9 +2,13 @@ import { productModel } from "../models/productModel.js";
 
 export default class Products {
 
-    createProduct = async (product) => {
+    createProduct = async (product, user) => {
+        if (!user || (user.role !== 'premium' && user.role !== 'admin')) {
+            throw new Error('Solo los usuarios premium o admin pueden crear productos');
+        }
+        product.owner = user.email;
         let result = await productModel.create(product);
-        return result
+        return result;
     };
     paginateProducts = async (filter, options) => {
         let result = await productModel.paginate(filter, options);

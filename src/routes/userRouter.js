@@ -27,7 +27,6 @@ userRouter.post('/login', passport.authenticate(
   }
 
   req.session.user = new UserDTO(req.user)
-
     res.redirect('/products');
 }
 );
@@ -68,6 +67,7 @@ userRouter.get('/githubcallback', passport.authenticate('github',{failureRedirec
     });
   }
   const usuarioAutenticado = req.user;
+
   const user = await userController.showCurrentUser(usuarioAutenticado)
 
   return res.json({

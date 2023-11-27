@@ -20,7 +20,6 @@ router.get('/products', async (req, res) => {
       sort: req.query.sort,
     };
     const user = req.session.user
-
     const productsData = await productDBController.getAllProducts(queryParams);
     res.render('products', {
       products: productsData.payload,

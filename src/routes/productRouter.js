@@ -13,7 +13,7 @@ const productDBController = new productController();
 router.get('/', async (req, res) => {
   const limit = parseInt(req.query.limit);
   const page = parseInt(req.query.page);
-  const sort= req.query.sort;
+  const sort = req.query.sort;
   const category = req.query.category;
   const status = req.query.status;
 
@@ -28,16 +28,16 @@ router.get('/', async (req, res) => {
   const queryString = queryParams.toString();
 
   const response = {
-      status: "success",
-      payload: products.docs,
-      totalPages: products.totalPages,
-      prevPage: products.prevPage,
-      nextPage: products.nextPage,
-      page: products.page,
-      hasPrevPage: products.hasPrevPage,
-      hasNextPage: products.hasNextPage,
-      prevLink: products.hasPrevPage ? `/products?page=${products.prevPage}&${queryString}` : '',
-      nextLink: products.hasNextPage ? `/products?page=${products.nextPage}&${queryString}` : '',
+    status: "success",
+    payload: products.docs,
+    totalPages: products.totalPages,
+    prevPage: products.prevPage,
+    nextPage: products.nextPage,
+    page: products.page,
+    hasPrevPage: products.hasPrevPage,
+    hasNextPage: products.hasNextPage,
+    prevLink: products.hasPrevPage ? `/products?page=${products.prevPage}&${queryString}` : '',
+    nextLink: products.hasNextPage ? `/products?page=${products.nextPage}&${queryString}` : '',
   };
 
   res.send(response)
@@ -47,71 +47,79 @@ router.get('/:pid', async (req, res) => {
   const product = await productDBController.getProductById(req.params.pid);
 
   if (!product) {
-      return res.status(404).send({ error: 'Producto no encontrado' });
+    return res.status(404).send({ error: 'Producto no encontrado' });
   }
 
-  res.send({product});
+  res.send({ product });
 })
-//authorization('admin'),
 
-router.post('/', async (req,res,next)=> {
-  try{
-      const { title, description, price, thumbnails, code, stock, category, status } = req.body;
 
-      if (!title || !description || !price || !code || !stock || !category) {
-          CustomError.createError({
-              name: 'Product creation error',
-              cause: generateProductErrorInfo({title, description, price, code, stock, category}),
-              message: 'Error trying to create Product',
-              code: ErrorCodes.INVALID_TYPES_ERROR,
-          });
-      }
-
-      const product = await productDBController.createProduct({title, description, price, thumbnails, code, stock, category, status});
-
-      res.send({
-          status: 'success',
-          payload: product
+router.post('/', async (req, res, next) => {
+  try {
+    const { title, description, price, thumbnails, code, stock, category, status } = req.body;
+    const user = req.user;
+    if (!title || !description || !price || !code || !stock || !category) {
+      CustomError.createError({
+        name: 'Product creation error',
+        cause: generateProductErrorInfo({ title, description, price, code, stock, category }),
+        message: 'Error trying to create Product',
+        code: ErrorCodes.INVALID_TYPES_ERROR,
       });
+    }
+
+    const product = await productDBController.createProduct({ title, description, price, thumbnails, code, stock, category, status }, user);
+
+    res.send({
+      status: 'success',
+      payload: product
+    });
   }
-  catch (error){
-      next(error);
-      }
+  catch (error) {
+    next(error);
+  }
 })
 
-
-
-
-
-
-
-
-
-
-
-
-router.put('/:pid', authorization('admin'), async (req, res) => {
+router.put('/:pid', async (req, res) => {
   const productId = req.params.pid;
   const modifications = req.body;
 
   const product = await productDBController.getProductById(productId);
 
   if (!product) {
-      return res.status(404).send({ error: 'Producto no encontrado' });
+    return res.status(404).send({ error: 'Producto no encontrado' });
   }
 
   await productDBController.updateProduct(productId, modifications);
   const updatedProduct = await productDBController.getProductById(productId);
-  
+
   res.send({ updatedProduct });
 });
 
-router.delete('/:pid', authorization('admin'), async (req, res) => {
-  const productId = req.params.pid;
-  const product = await productDBController.deleteProduct(productId);
+router.delete('/:pid', async (req, res, next) => {
+  try {
+      const productId = req.params.pid;
+      const user = req.user; 
+      const product = await productDBController.getProductById(productId);
 
-  res.send({product, message: `El producto con Id ${productId} fue eliminado`});
-})
+      if (!product) {
+          return res.status(404).send({ error: 'Producto no encontrado' });
+      }
+      if (user.role !== 'premium' && user.role !== 'admin') {
+          return res.status(403).send({ error: 'No tienes permisos para realizar esta acción' });
+      }
+      if (user.role === 'premium' && product.owner !== user.email) {
+          return res.status(403).send({ error: 'No puedes borrar productos que no te pertenecen' });
+      }
+
+
+      const deletedProduct = await productDBController.deleteProduct(productId);
+
+      res.send({ deletedProduct, message: `El producto con Id ${productId} fue eliminado` });
+  } catch (error) {
+      next(error);
+  }
+});
+
 
 
 
