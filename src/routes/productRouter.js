@@ -39,8 +39,11 @@ router.get('/', async (req, res) => {
     prevLink: products.hasPrevPage ? `/products?page=${products.prevPage}&${queryString}` : '',
     nextLink: products.hasNextPage ? `/products?page=${products.nextPage}&${queryString}` : '',
   };
-
-  res.send(response)
+  
+  res.send({
+    status: 'success',
+    payload: products
+  });
 })
 
 router.get('/:pid', async (req, res) => {
@@ -50,7 +53,9 @@ router.get('/:pid', async (req, res) => {
     return res.status(404).send({ error: 'Producto no encontrado' });
   }
 
-  res.send({ product });
+  res.send({
+    status: 'success',
+    payload: product });
 })
 
 
@@ -92,13 +97,18 @@ router.put('/:pid', async (req, res) => {
   await productDBController.updateProduct(productId, modifications);
   const updatedProduct = await productDBController.getProductById(productId);
 
-  res.send({ updatedProduct });
+  res.send(
+   { 
+    status: 'success',
+    payload: {updatedProduct} 
+  });
 });
 
 router.delete('/:pid', async (req, res, next) => {
   try {
       const productId = req.params.pid;
       const user = req.user; 
+      console.log(user)
       const product = await productDBController.getProductById(productId);
 
       if (!product) {
@@ -116,8 +126,9 @@ router.delete('/:pid', async (req, res, next) => {
 
       res.send({ deletedProduct, message: `El producto con Id ${productId} fue eliminado` });
   } catch (error) {
-      next(error);
-  }
+    console.error('Error al intentar eliminar el producto:', error);
+    next(error);
+}
 });
 
 

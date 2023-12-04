@@ -42,8 +42,15 @@ export default class CartRepository {
         let result = await this.dao.removeAllProducts(cartId);
         return result
     }
-    popCartById = async (_id) => {
-        let result = await this.dao.getCartById(_id);
-        return result
+// En tu cartsService
+async popCartById(id) {
+    try {
+        const cart = await this.dao.findCart(id);
+        return cart;
+    } catch (error) {
+        console.error('Error al buscar el carrito:', error);
+        return null;
     }
+}
+
 }

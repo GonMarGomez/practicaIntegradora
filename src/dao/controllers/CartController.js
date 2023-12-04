@@ -30,21 +30,22 @@ class CartController {
         }
     }
 
-      async getCartById(id) {
-        try {
-            const cart = await cartsService.popCartById({_id: id});
+async getCartById(id) {
+    try {
+        const cart = await cartsService.popCartById(id);
 
-            if (cart) {
-                return cart;
-            } else {
-                console.error('Producto no encontrado');
-                return null;
-            }
-        } catch (err) {
-            console.error('Error al leer el archivo de productos:', err);
+        if (cart) {
+            return cart;
+        } else {
+            console.error('Producto no encontrado');
             return null;
         }
+    } catch (err) {
+        console.error('Error al leer el archivo de productos:', err);
+        return null;
     }
+}
+
     async addProductToCart(cartId, product, quantity) {
         try {
             const cart = await cartsService.findCartById(cartId);

@@ -1,0 +1,316 @@
+openapi: '3.0.3'
+info:
+  title: "Documentación"
+  description: "API de Tienda de Videojuegos"
+  version: "1.0.0"
+
+paths:
+  /api/product/:
+    post:
+      summary: Crea un nuevo producto
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/createProduct'
+      responses:
+        "200":
+          description: El producto fue creado satisfactoriamente
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "500":
+          description: Error interno del servidor
+    get:
+      summary: Obtiene todos los productos
+      tags:
+        - Products
+      responses:
+        "200":
+          description: Los productos fueron obtenidos satisfactoriamente
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: 
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Productos obtenidos correctamente
+        "500":
+          description: Error interno del servidor
+
+  /api/product/{pid}:
+    get:
+      summary: Obtiene el producto según su Id
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Id del producto
+          schema:
+            $type: String
+      responses:
+        "200":
+          description: El producto fue obtenido satisfactoriamente
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "500":
+          description: Error interno del servidor
+    put:
+      summary: Modifica un producto según su Id
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Id del producto
+          schema:
+            $type: String
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/updateProduct'
+      responses:
+        "200":
+          description: El producto fue modificado satisfactoriamente
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModified'
+        "500":
+          description: Error interno del servidor
+  paths:
+  /api/products/{pid}:
+    delete:
+      summary: Delete the product by Id
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Id of the product
+          schema:
+            $type: String
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              user:
+                role: admin
+      responses:
+        "200":
+          description: The product was deleted successfully
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: 
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Product deleted successfully
+        "500":
+          description: Internal Server Error
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id autogenerado por MongoDB
+        title:
+          type: String
+          description: Nombre del producto
+        description:
+          type: String
+          description: Descripción del producto
+        price:
+          type: Number
+          description: Precio del producto
+        thumbnails:
+          type: Array
+          description: Fotos del producto
+        code:
+          type: String
+          description: Código del producto
+        stock:
+          type: Number
+          description: Cantidad de productos en stock
+        category:
+          type: String
+          description: Categoría del producto
+        status:
+          type: Boolean
+          description: Disponibilidad del producto
+        owner:
+          type: String
+          description: Creador del producto
+      example:
+        _id: 654e8d9cdd7bc5ac119b66c0
+        title: Cuphead
+        description: "Cuphead es un videojuego perteneciente al género de corre y dispara, publicado por la empresa canadiense StudioMDHR."
+        price: 3500
+        thumbnails: [Sin imagen]
+        code: hJ95fg0
+        stock: 10
+        category: Shoot and Run
+        status: true
+        owner: admin
+    ProductModified:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id autogenerado por MongoDB
+        title:
+          type: String
+          description: Nombre del producto
+        description:
+          type: String
+          description: Descripción del producto
+        price:
+          type: Number
+          description: Precio del producto
+        thumbnails:
+          type: Array
+          description: Fotos del producto
+        code:
+          type: String
+          description: Código del producto
+        stock:
+          type: Number
+          description: Cantidad de productos en stock
+        category:
+          type: String
+          description: Categoría del producto
+        status:
+          type: Boolean
+          description: Disponibilidad del producto
+        owner:
+          type: String
+          description: Creador del producto
+      example:
+        _id: 654e8d9cdd7bc5ac119b66c0
+        title: Cuphead
+        description: "Cuphead es un videojuego perteneciente al género de corre y dispara, publicado por la empresa canadiense StudioMDHR."
+        price: 3500
+        thumbnails: [Sin imagen]
+        code: hJ95fg0
+        stock: 10
+        category: Shoot and Run
+        status: true
+        owner: admin
+  requestBodies:
+    createProduct:
+      type: object
+      properties:
+        title:
+          type: String
+          description: Nombre del producto
+        description:
+          type: String
+          description: Descripción del producto
+        price:
+          type: Number
+          description: Precio del producto
+        thumbnails:
+          type: Array
+          description: Fotos del producto
+        code:
+          type: String
+          description: Código del producto
+        stock:
+          type: Number
+          description: Cantidad de productos en stock
+        category:
+          type: String
+          description: Categoría del producto
+        status:
+          type: Boolean
+          description: Disponibilidad del producto
+        owner:
+          type: String
+          description: Creador del producto
+      example:
+        title: Cuphead
+        description: "Cuphead es un videojuego perteneciente al género de corre y dispara, publicado por la empresa canadiense StudioMDHR."
+        price: 3500
+        thumbnails: [Sin imagen]
+        code: hJ95fg0
+        stock: 10
+        category: Shoot and Run
+        status: true
+        owner: admin
+    updateProduct:
+      type: object
+      properties:
+        title:
+          type: String
+          description: Nombre del producto
+        description:
+          type: String
+          description: Descripción del producto
+        price:
+          type: Number
+          description: Precio del producto
+        thumbnails:
+          type: Array
+          description: Fotos del producto
+        code:
+          type: String
+          description: Código del producto
+        stock:
+          type: Number
+          description: Cantidad de productos en stock
+        category:
+          type: String
+          description: Categoría del producto
+        status:
+          type: Boolean
+          description: Disponibilidad del producto
+      example:
+        title: Cuphead
+        description: "Cuphead es un videojuego perteneciente al género de corre y dispara, publicado por la empresa canadiense StudioMDHR."
+        price: 3500
+        thumbnails: [Sin imagen]
+        code: hJ95fg0
+        stock: 10
+        category: Shoot and Run
+        status: true
+  examples:
+    ProductCreated:
+      value:
+        status: success
+        message: Producto creado correctamente
+    ProductNotFound:
+      value:
+        status: error
+        error: Producto no encontrado
+    ProductDeleted:
+      value:
+        status: success
+        message: Producto eliminado correctamente
+    ProductModified:
+      value:
+        status: success
+        message: Producto modificado correctamente

@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 import { Server } from 'socket.io';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUiExpress from 'swagger-ui-express';
 
 
 import productRouter from './routes/productRouter.js';
@@ -48,6 +50,18 @@ app.use(
     saveUninitialized: false,
   })
 );
+const swaggerOptions = {
+  definition: {
+      openapi: '3.0.3',
+      info: {
+          title: "Documentación",
+          description: "API de Tienda de Videojuegos",
+      }
+  },
+  apis:[`${__dirname}/../../docs/**/*.yaml`],
+}
+const specs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 
 initializatePassport();
 app.use(passport.initialize());
