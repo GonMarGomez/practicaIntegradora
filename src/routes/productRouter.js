@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
     prevLink: products.hasPrevPage ? `/products?page=${products.prevPage}&${queryString}` : '',
     nextLink: products.hasNextPage ? `/products?page=${products.nextPage}&${queryString}` : '',
   };
-  
+
   res.send({
     status: 'success',
     payload: products
@@ -55,7 +55,8 @@ router.get('/:pid', async (req, res) => {
 
   res.send({
     status: 'success',
-    payload: product });
+    payload: product
+  });
 })
 
 
@@ -71,7 +72,13 @@ router.post('/', async (req, res, next) => {
         code: ErrorCodes.INVALID_TYPES_ERROR,
       });
     }
-
+    // ...
+    else if (user.role !== 'admin' && user.role !== 'premium') {
+      res.status(401).send({
+        status: 'error',
+        message: 'Unauthorized.'
+      });
+    }
     const product = await productDBController.createProduct({ title, description, price, thumbnails, code, stock, category, status }, user);
 
     res.send({
@@ -98,37 +105,37 @@ router.put('/:pid', async (req, res) => {
   const updatedProduct = await productDBController.getProductById(productId);
 
   res.send(
-   { 
-    status: 'success',
-    payload: {updatedProduct} 
-  });
+    {
+      status: 'success',
+      payload: { updatedProduct }
+    });
 });
 
 router.delete('/:pid', async (req, res, next) => {
   try {
-      const productId = req.params.pid;
-      const user = req.user; 
-      console.log(user)
-      const product = await productDBController.getProductById(productId);
+    const productId = req.params.pid;
+    const user = req.user;
+    console.log(user)
+    const product = await productDBController.getProductById(productId);
 
-      if (!product) {
-          return res.status(404).send({ error: 'Producto no encontrado' });
-      }
-      if (user.role !== 'premium' && user.role !== 'admin') {
-          return res.status(403).send({ error: 'No tienes permisos para realizar esta acción' });
-      }
-      if (user.role === 'premium' && product.owner !== user.email) {
-          return res.status(403).send({ error: 'No puedes borrar productos que no te pertenecen' });
-      }
+    if (!product) {
+      return res.status(404).send({ error: 'Producto no encontrado' });
+    }
+    if (user.role !== 'premium' && user.role !== 'admin') {
+      return res.status(403).send({ error: 'No tienes permisos para realizar esta acción' });
+    }
+    if (user.role === 'premium' && product.owner !== user.email) {
+      return res.status(403).send({ error: 'No puedes borrar productos que no te pertenecen' });
+    }
 
 
-      const deletedProduct = await productDBController.deleteProduct(productId);
+    const deletedProduct = await productDBController.deleteProduct(productId);
 
-      res.send({ deletedProduct, message: `El producto con Id ${productId} fue eliminado` });
+    res.send({ deletedProduct, message: `El producto con Id ${productId} fue eliminado` });
   } catch (error) {
     console.error('Error al intentar eliminar el producto:', error);
     next(error);
-}
+  }
 });
 
 

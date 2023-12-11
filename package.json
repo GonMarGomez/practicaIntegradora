@@ -6,7 +6,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/app.js"
+    "start": "nodemon src/app.js",
+    "supertest": "mocha 'test/**/*.test.js'"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +38,9 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "handlebars": "^4.7.8"
+    "chai": "^4.3.10",
+    "handlebars": "^4.7.8",
+    "mocha": "^10.2.0",
+    "supertest": "^6.3.3"
   }
 }
