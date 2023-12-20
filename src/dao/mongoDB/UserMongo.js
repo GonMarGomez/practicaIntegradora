@@ -48,13 +48,32 @@ export default class Users {
         );
         return result;
     } 
+    updateUser = async (userId, field, newUpdate) => {
+        let updateObject = {};
+        updateObject[field] = newUpdate;
+      
+        let result = await userModel.updateOne(
+          { _id: userId },
+          { $set: updateObject }
+        );
+      
+        return result;
+      };
+       updateDocuments = async (userId, document) => {
+          const result = await userModel.updateOne(
+            { _id: userId },
+            { $push: { documents: document } }
+          );
+      
+          return result;
+      };
+       
 
     updateRole = async (userId, newRole) =>{
         let result = await userModel.updateOne(
             { _id: userId },
             { $set: { role:newRole}},
         );
-        console.log("Soy Update result:", result);
         return result;
     } 
 }

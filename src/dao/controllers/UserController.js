@@ -1,4 +1,5 @@
 import { userService } from '../repository/index.js';
+
 import {createHash, isValidPassword} from '../../utils/funcionUtil.js'
 
 class UserController {
@@ -83,6 +84,23 @@ class UserController {
             return null;
         }
     }
-
+    async updateUser(userId, field, newUpdate){
+        try{ let result = await userService.updateUser(userId, field, newUpdate);
+            return result}
+        catch(error){
+            console.error('No se puede actualizar el usuario', error)
+            return null
+        }
+       
+    };
+ async updateDocuments (userId, documents){
+    try{
+        const updateResult = await userService.updateDocument(userId,documents);
+    }
+    catch(err){
+        console.error('Error al agregar los documentos', err)
+        return null;
+    }
+ }
 }
 export default UserController;

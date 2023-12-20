@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { uploader } from "../utils/multerUtil.js";
 import { authorization } from "../utils/authorization.js";
 import { productController } from "../dao/controllers/productController.js";
 import CustomError from "../errorHandler/CustomError.js";

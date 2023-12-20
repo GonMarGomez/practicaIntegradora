@@ -1,13 +1,46 @@
 import { Router } from 'express';
+import util from 'util'
+import {format} from 'date-fns'
 import UserDTO from '../dao/DTOs/userDTO.js';
 import passport from 'passport';
 import local from 'passport-local'
+import {uploader} from '../utils/multerUtil.js'
+import __dirname from '../utils/constantUtils.js';
 import UserController from '../dao/controllers/UserController.js';
 import { authorization } from '../utils/authorization.js';
 
 const userRouter = Router();
 const localStratergy = local.Strategy;
 const userController = new UserController()
+
+userRouter.post('/:uid/documents', uploader.single('file'), async (req, res) => {
+  try {
+    const file = req.file;
+    const { uid } = req.params;
+    const fileType = req.body.fileType;
+
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
+    const document = {
+      name: file.originalname,
+      reference: `${__dirname}/../public/img/${fileType}/${file.filename}`
+    };
+    await  userController.updateDocuments(uid, document);
+
+    return res.status(201).json({
+      status: 'success',
+      message: 'User successfully updated',
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+    });
+  }
+});
 
 userRouter.post('/register', passport.authenticate(
   'register', { failureRedirect: '/api/sessions/failRegister' }
@@ -25,6 +58,10 @@ userRouter.post('/login', passport.authenticate(
   if(!req.user){
     return res.status(400).send({status: 'error', error: 'Invalid Credentials'})
   }
+  let userId = req.user._id
+  const lastConnection = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
+  let toUpdate = 'last_connection'
+  await userController.updateUser(userId,toUpdate, lastConnection)
 
   req.session.user = new UserDTO(req.user)
     res.redirect('/products');
@@ -78,20 +115,26 @@ userRouter.get('/githubcallback', passport.authenticate('github',{failureRedirec
 
 userRouter.put('/premium/:uid', async (req, res) => {
   try {
-      const userId = req.params.uid;
-      const user = await userController.getUserById(userId);
+    const userId = req.params.uid;
+    const user = await userController.getUserById(userId);
 
-      if (!user) {
-          return res.status(404).send({ error: 'Usuario no encontrado' });
-      }
-      const newRole = user.role === 'user' ? 'premium' : 'user';
-      await userController.updateUserRole(userId, newRole);
+    if (!user) {
+      return res.status(404).send({ error: 'Usuario no encontrado' });
+    }
 
-      res.send({ message: `Rol del usuario ${userId} cambiado a ${newRole}` });
+    if (!user.documents || user.documents.length < 3) {
+      return res.status(400).send({ error: 'El usuario debe cargar los documentos necesarios antes de cambiar a premium' });
+    }
+
+    const newRole = user.role === 'user' ? 'premium' : 'user';
+    await userController.updateUserRole(userId, newRole);
+
+    res.send({ message: `Rol del usuario ${userId} cambiado a ${newRole}` });
   } catch (error) {
-      console.error(error);
-      res.status(500).send({ error: 'Error interno del servidor' });
+    console.error(error);
+    res.status(500).send({ error: 'Error interno del servidor' });
   }
 });
+
 
 export default userRouter;

@@ -52,6 +52,22 @@ const userSchema = mongoose.Schema({
         ],
         default: [],
     },
+    documents: {
+        type: [
+          {
+            name: {
+              type: String,
+            },
+            reference: {
+              type: String,
+              default: '', 
+            },
+          },
+        ],
+        default: [],
+      },
+      
+    last_connection: {type: Date, default: '' }
 });
 
 
