@@ -1,5 +1,5 @@
-import Products from "../mongoDB/ProductsMongo.js";
 import Users from "../mongoDB/userMongo.js";
+import Products from "../mongoDB/ProductsMongo.js";
 import Carts from "../mongoDB/CartMongo.js";
 import Tickets from "../mongoDB/ticketsMongo.js";
 import Chat from "../mongoDB/chatMongo.js";
