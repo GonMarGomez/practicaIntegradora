@@ -1,4 +1,4 @@
-import Users from "../mongoDB/userMongo.js";
+import Users from '../mongoDB/UserMongo.js'
 import Products from "../mongoDB/ProductsMongo.js";
 import Carts from "../mongoDB/CartMongo.js";
 import Tickets from "../mongoDB/ticketsMongo.js";
