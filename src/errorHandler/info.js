@@ -1,5 +1,4 @@
 export const  generateProductErrorInfo = (product) => {
-    console.log(product)
     return `Error al generar producto. Se obtuvieron los siguientes datos: 
 	- title: ${product.title} 
 	- description: ${product.description} 

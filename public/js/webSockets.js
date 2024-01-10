@@ -41,7 +41,6 @@ socket.on("messagesLogs", (data) => {
 });
 
 socket.on("newUser", (data) => {
-  console.log('SOY EL NUEVO CONECTADO')
   Swal.fire({
     text: `${data} se ha unido al chat`,
     toast: true,

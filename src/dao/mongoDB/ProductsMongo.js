@@ -1,12 +1,11 @@
 import { productModel } from "../models/productModel.js";
+import UserDTO from "../DTOs/userDTO.js";
+import mongoose from 'mongoose';
 
 export default class Products {
 
     createProduct = async (product, user) => {
-        if (!user || (user.role !== 'premium' && user.role !== 'admin')) {
-            throw new Error('Solo los usuarios premium o admin pueden crear productos');
-        }
-        product.owner = user.email;
+        product.owner = user._id
         let result = await productModel.create(product);
         return result;
     };

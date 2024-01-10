@@ -1,0 +1,32 @@
+<h1>Crear Producto</h1>
+ <a href="/products" class="logo">GameShop</a>
+<form action="/api/product/" method="POST">
+  <label for="title">Título:</label>
+  <input type="text" name="title" required>
+
+  <label for="description">Descripción:</label>
+  <textarea name="description" required></textarea>
+
+  <label for="price">Precio:</label>
+  <input type="number" name="price" required>
+
+  <label for="thumbnails">Imágenes (separadas por comas):</label>
+  <input type="text" name="thumbnails">
+
+  <label for="code">Código:</label>
+  <input type="text" name="code" required>
+
+  <label for="stock">Stock:</label>
+  <input type="number" name="stock" required>
+
+  <label for="category">Categoría:</label>
+  <input type="text" name="category" required>
+
+  <label for="status">Estado:</label>
+  <select name="status" required>
+    <option value="true">Activo</option>
+    <option value="false">Inactivo</option>
+  </select>
+
+  <button type="submit">Crear Producto</button>
+</form>

@@ -77,7 +77,9 @@ app.use('/send',mailRouter)
 app.use('/forgot-password', changePasswordRouter)
 app.use('/test', mockingProducts)
 app.use('/testLog', testLoggs)
-const PORT = process.env.PORT;
+
+
+const PORT = process.env.PORT||8080;
 const httpServer = app.listen(PORT, () => {
   console.log(`Start server in port ${PORT}`);
 });

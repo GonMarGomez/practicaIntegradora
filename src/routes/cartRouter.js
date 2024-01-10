@@ -26,20 +26,29 @@ cartRouter.get('/:cid', async (req, res) => {
 cartRouter.post('/:cid/product/:pid', async (req, res) => {
     const cartId = req.params.cid;
     const productId = req.params.pid;
-    const cart = await cartController.getCartById(cartId);
-        if (!cart) {
-            return res.status(404).send({ error: 'Carrito no encontrado' });
-        }
 
-    const product = await productDBController.getProductById(productId);
+    try {
+        let cart = await cartController.getCartById(cartId);
+
+        if (!cart) {
+            const newCart = await cartController.createCart();
+            cart = newCart.cart;
+        }
+        const product = await productDBController.getProductById(productId);
+
         if (!product) {
             return res.status(404).send({ error: 'Producto no encontrado' });
         }
 
-        await cartController.addProductToCart(cartId, productId, 1);
-     
+        await cartController.addProductToCart(cart._id, productId, 1);
+
         res.send(cart);
+    } catch (error) {
+        console.error('Error al procesar la solicitud:', error);
+        res.status(500).send({ error: 'Error interno del servidor' });
+    }
 });
+
 cartRouter.put('/:cid', async (req, res) => {
     const cartId = req.params.cid;
     const newCart = req.body;
@@ -70,8 +79,6 @@ cartRouter.put('/:cid/product/:pid', async (req, res) => {
 cartRouter.delete('/:cid/product/:pid', async (req, res) => {
     const cartId = req.params.cid;
     const productId = req.params.pid;
-    console.log('Cart ID:', cartId);
-    console.log('Product ID:', productId);
     
     const result = await cartController.deleteProductFromCart(cartId, productId);
 

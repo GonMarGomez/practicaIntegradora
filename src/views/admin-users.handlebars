@@ -1,0 +1,39 @@
+<h1>{{ title }}</h1>
+ <a href="/products" class="logo">GameShop</a>
+  {{#if users.length}}
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Rol Actual</th>
+          <th>Seleccionar Nuevo Rol</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each users}}
+          <tr>
+            <td>{{ this.email }}</td>
+            <td>{{ this.role }}</td>
+            <td>
+              <form action="/admin/users/update-role/{{ this.email }}" method="post">
+                <select name="newRole">
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                  <option value="premium">Premium</option>
+                </select>
+                <button type="submit">Cambiar Rol</button>
+              </form>
+            </td>
+            <td>
+              <form action="/admin/users/delete/{{ this.email }}" method="post">
+                <button type="submit">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
+    <p>No hay usuarios disponibles.</p>
+  {{/if}}

@@ -18,34 +18,43 @@ class TicketController {
         }        
     }
 
-    async generateTicket(_id, email, userId){
-        const cart = await cartsService.findCartById(_id);
-        if (!cart) {
+    async generateTicket(_id, email, userId) {
+        try {
+          const cart = await cartsService.findCartById(_id);
+      
+          if (!cart) {
             throw new Error('Carrito no encontrado');
-        }
-
-        const { 
+          }
+      
+          const {
             productsAvailable,
             productsNotAvailable,
             ticketDataArray
-            } = await productService.processProducts(cart);
-
-
-        if (productsNotAvailable.length > 0) {
-            console.error(`No hay stock para estos productos: ${productsNotAvailable} `)
-        }
-
-        if (productsAvailable.length > 0){
+          } = await productService.processProducts(cart);
+      
+          if (productsNotAvailable.length > 0) {
+            console.error(`No hay stock para estos productos: ${productsNotAvailable}`);
+          }
+      
+          if (productsAvailable.length > 0) {
             const ticket = await ticketsService.saveTicket(ticketDataArray, email);
+      
+            // Ahora, agregamos el ticket al usuario
             await userService.addTicketToUser(userId, ticket._id);
-            
+      
             for (const product of productsAvailable) {
-                await cartsService.deleteOneProduct(cart, product.productId);
+              await cartsService.deleteOneProduct(cart, product.productId);
             }
-        }else{
+          } else {
             console.error(`No hay productos para facturar`);
+          }
+        } catch (error) {
+          console.error('Error al generar el ticket:', error);
+          throw error; // Propagar el error para que pueda ser manejado en el nivel superior si es necesario.
         }
-    }
+      }
+      
+
     async deleteTicketFromUser (userId){
         await userService.removeTicketFromUser(userId);
     }

@@ -1,13 +1,19 @@
 import { Router } from "express";
+import nodemailer from 'nodemailer';
+
+import passport from 'passport';
 import { authorization } from "../utils/authorization.js";
-import { productController } from "../dao/controllers/productController.js";
 import CustomError from "../errorHandler/CustomError.js";
 import { generateProductErrorInfo } from "../errorHandler/info.js";
+import { productController } from "../dao/controllers/productController.js";
 import ErrorCodes from "../errorHandler/enums.js";
-
+import { canDeleteProduct } from "../utils/funcionUtil.js";
+import UserController from "../dao/controllers/UserController.js";
 const router = Router();
 
+
 const productDBController = new productController();
+const userDBController = new UserController();
 
 router.get('/', async (req, res) => {
   const limit = parseInt(req.query.limit);
@@ -59,10 +65,11 @@ router.get('/:pid', async (req, res) => {
 })
 
 
-router.post('/', async (req, res, next) => {
+router.post('/', authorization('premium'), async (req, res, next) => {
   try {
+
     const { title, description, price, thumbnails, code, stock, category, status } = req.body;
-    const user = req.user;
+
     if (!title || !description || !price || !code || !stock || !category) {
       CustomError.createError({
         name: 'Product creation error',
@@ -71,24 +78,26 @@ router.post('/', async (req, res, next) => {
         code: ErrorCodes.INVALID_TYPES_ERROR,
       });
     }
-    // ...
-    else if (user.role !== 'admin' && user.role !== 'premium') {
-      res.status(401).send({
-        status: 'error',
-        message: 'Unauthorized.'
-      });
-    }
-    const product = await productDBController.createProduct({ title, description, price, thumbnails, code, stock, category, status }, user);
+    let user = req.user 
+    const product = await productDBController.createProduct({
+      title,
+      description,
+      price,
+      thumbnails,
+      code,
+      stock,
+      category,
+      status
+    }, user);
 
     res.send({
       status: 'success',
       payload: product
     });
-  }
-  catch (error) {
+  } catch (error) {
     next(error);
   }
-})
+});
 
 router.put('/:pid', async (req, res) => {
   const productId = req.params.pid;
@@ -110,32 +119,69 @@ router.put('/:pid', async (req, res) => {
     });
 });
 
-router.delete('/:pid', async (req, res, next) => {
+// En productRouter.js
+
+router.delete('/delete', async (req, res, next) => {
   try {
-    const productId = req.params.pid;
-    const user = req.user;
-    console.log(user)
+    const productId = req.body.productId;
+    const user = req.session.user;
+
     const product = await productDBController.getProductById(productId);
 
     if (!product) {
       return res.status(404).send({ error: 'Producto no encontrado' });
     }
-    if (user.role !== 'premium' && user.role !== 'admin') {
-      return res.status(403).send({ error: 'No tienes permisos para realizar esta acción' });
+    const productoToEliminate = product[0];
+    const ownerId = productoToEliminate.owner.toString();
+    let ownerProduct = await userDBController.getUserById(ownerId)
+    
+    if (user.role === 'admin' || (user.role === 'premium' && canDeleteProduct(user.role, user.email, ownerProduct))) {
+  
+      const productOwnerEmail = ownerProduct.email;     
+      
+      const deletedProduct = await productDBController.deleteProduct({ _id: productId });
+      
+      res.send({ deletedProduct, message: `El producto con Id ${productId} fue eliminado` });
+      await sendProductDeletedEmail(productOwnerEmail, product[0].title);
+    } else {
+      res.status(403).send({ error: 'No tienes permisos para eliminar este producto' });
     }
-    if (user.role === 'premium' && product.owner !== user.email) {
-      return res.status(403).send({ error: 'No puedes borrar productos que no te pertenecen' });
-    }
-
-
-    const deletedProduct = await productDBController.deleteProduct(productId);
-
-    res.send({ deletedProduct, message: `El producto con Id ${productId} fue eliminado` });
   } catch (error) {
     console.error('Error al intentar eliminar el producto:', error);
     next(error);
   }
 });
+
+
+async function sendProductDeletedEmail(userEmail, productName) {
+  const transport = nodemailer.createTransport({
+    service: 'gmail',
+    port: 587,
+    auth:{
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS 
+    }
+});
+  try {
+
+    await transport.sendMail({
+      from: 'Games Shop <tu-app@gmail.com>',
+      to: userEmail,
+      subject: 'Producto Eliminado',
+      html: `
+        <p>Hola,</p>
+        <p>Tu producto "${productName}" ha sido eliminado.</p>
+        <p>Gracias por usar nuestra plataforma.</p>
+      `,
+    });
+    console.log(`Correo electrónico enviado a ${userEmail} sobre la eliminación de ${productName}`);
+  } catch (error) {
+    console.error('Error al enviar el correo electrónico:', error);
+    throw new Error('Error al enviar el correo electrónico');
+  }
+}
+
+
 
 
 

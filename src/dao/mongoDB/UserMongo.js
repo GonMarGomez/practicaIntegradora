@@ -3,6 +3,10 @@ import { createHash } from "../../utils/funcionUtil.js";
 
 export default class Users {
 
+    getAllUsers = async () => {
+        const result = await userModel.find({});
+        return result;
+    }
     findByEmail = async (email) => {
         const normalizedEmail = String(email).toLowerCase();
         const result = await userModel.findOne({ email: normalizedEmail }).populate({
@@ -76,4 +80,25 @@ export default class Users {
         );
         return result;
     } 
+    findInactiveUsers = async (lastConnectionThreshold) => {
+        const result = await userModel.find({ last_connection: { $lt: lastConnectionThreshold } });
+        return result;
+    }
+
+    deleteInactiveUsers = async () => {
+        const twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    
+        const result = await userModel.deleteMany({ last_connection: { $lt: twoDaysAgo } });
+        return result.deletedCount;
+    };
+    deleteUser = async (userId) => {
+        try {
+            const result = await userModel.deleteOne({ _id: userId });
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    };
+    
 }

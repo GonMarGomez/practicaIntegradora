@@ -53,7 +53,6 @@ async getCartById(id) {
                 console.error("Carrito no encontrado");
                 return;
             }
-            console.log(product);
             const existingProduct = cart.products.find(item => item.product.toString() === product[0]._id.toString());
     
             if (existingProduct) {

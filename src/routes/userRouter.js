@@ -13,6 +13,22 @@ const userRouter = Router();
 const localStratergy = local.Strategy;
 const userController = new UserController()
 
+userRouter.get('/', async (req, res) => {
+  try {
+      const allUsers = await userController.getAllUsers();
+      res.json({
+          status: 'success',
+          payload: allUsers,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({
+          status: 'error',
+          message: 'Error interno del servidor',
+      });
+  }
+});
+
 userRouter.post('/:uid/documents', uploader.single('file'), async (req, res) => {
   try {
     const file = req.file;
@@ -135,6 +151,22 @@ userRouter.put('/premium/:uid', async (req, res) => {
     res.status(500).send({ error: 'Error interno del servidor' });
   }
 });
+userRouter.delete('/', async (req, res) => {
+  try {
+      const { deletedCount, inactivityEmails } = await userController.deleteInactiveUsers();
 
+      res.json({
+          status: 'success',
+          message: `${deletedCount} usuarios inactivos han sido eliminados.`,
+          inactivityEmails,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({
+          status: 'error',
+          message: 'Error interno del servidor',
+      });
+  }
+});
 
 export default userRouter;

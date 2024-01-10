@@ -47,7 +47,6 @@ class CartController {
         
             const cart = this.carts.find((cart) => cart.id === id);
             if (cart) {
-                console.log(cart);
                 return cart;
             } else {
                 console.error('Producto no encontrado');

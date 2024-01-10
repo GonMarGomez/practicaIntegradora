@@ -1,7 +1,7 @@
 import ErrorCodes from "../errorHandler/enums.js";
 
 export default (err, req, res, next) => {
-    console.log(err.code);
+
 
     switch (err.code) {
         case ErrorCodes.INVALID_PARAMS:
@@ -12,5 +12,5 @@ export default (err, req, res, next) => {
             break;
         default:
             res.status(500).send({status: 'err', err: 'Unhandled err'});
-    }
+}
 }

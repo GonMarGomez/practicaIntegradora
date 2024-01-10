@@ -1,4 +1,6 @@
+import nodemailer from 'nodemailer';
 import { userService } from '../repository/index.js';
+import UserDTO from '../DTOs/userDTO.js'
 
 import {createHash, isValidPassword} from '../../utils/funcionUtil.js'
 
@@ -10,6 +12,19 @@ class UserController {
            return await userService.createNewUser(user);
         } catch (error) {
             throw new Error(error.message.replace(/"/g, "'"));
+        }
+    }
+    mapUsersToDTO = (users) => {
+        return users.map(user => new UserDTO(user));
+    }
+    async getAllUsers() {
+        try {
+            const users = await userService.getAllUsers();
+            const usersWithMainData = this.mapUsersToDTO(users);
+            return usersWithMainData;
+        } catch (error) {
+            console.error('Error al obtener todos los usuarios:', error);
+            throw error;
         }
     }
 
@@ -102,5 +117,51 @@ class UserController {
         return null;
     }
  }
+ 
+ async deleteInactiveUsers() {
+    try {
+        const transport = nodemailer.createTransport({
+            service: 'gmail',
+            port: 587,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        const inactiveUsers = await userService.findInactiveUsers();
+
+        const emailPromises = inactiveUsers.map(async (user) => {
+            await transport.sendMail({
+                from: 'Gon Gomez <gonzalomgomez5@gmail.com>',
+                to: user.email,
+                subject: 'Cuenta Eliminada por Inactividad',
+                html: `
+                    <div>
+                        <h1>Cuenta Eliminada por Inactividad</h1>
+                        <p>Tu cuenta ha sido eliminada debido a la inactividad.</p>
+                    </div>`,
+            });
+        });
+        await Promise.all(emailPromises);
+        const deletedCount = await userService.deleteInactiveUsers();
+        return {
+            deletedCount,
+            inactiveUsers,
+        };
+    } catch (error) {
+        console.error('Error al eliminar usuarios inactivos:', error);
+        throw error;
+    }
+}
+async deleteUser(userId) {
+    try {
+        const result = await userService.deleteUser(userId);
+        return result;
+    } catch (error) {
+        console.error('Error al eliminar usuario desde el controlador:', error);
+        throw error;
+    }
+}
 }
 export default UserController;

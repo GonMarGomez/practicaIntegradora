@@ -2,8 +2,8 @@ export default class ProductRepository {
     constructor(dao) {
         this.dao = dao;
     }
-    createProduct = async (data) => {
-        let result = await this.dao.createProduct(data);
+    createProduct = async (data, user) => {
+        let result = await this.dao.createProduct(data, user);
         return result
     }
     paginateProducts = async (filter, options) => {

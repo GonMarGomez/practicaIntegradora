@@ -4,7 +4,10 @@ export default class UserRepository {
     constructor (dao){
         this.dao = dao;
     };
-
+    getAllUsers = async () => {
+        const users = await this.dao.getAllUsers();
+        return users;
+    };
     getUser = async (data) => {
         let result = await this.dao.findByEmail(data);
         return result
@@ -51,6 +54,27 @@ export default class UserRepository {
     updateDocument = async (userId, document) =>{
         let result = await this.dao.updateDocuments(userId, document);
         return result
+    };
+    findInactiveUsers = async () => {
+        const twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+        const inactiveUsers = await this.dao.findInactiveUsers(twoDaysAgo);
+        return inactiveUsers;
+    };
+    
+    deleteUser = async (userId) => {
+        try {
+            const result = await this.dao.deleteUser(userId);
+            return result;
+        } catch (error) {
+            console.error('Error al eliminar usuario desde el repositorio:', error);
+            throw error;
+        }
+    };
+
+    deleteInactiveUsers = async () => {
+        const deletedCount = await this.dao.deleteInactiveUsers();
+        return deletedCount;
     };
 }
 
